@@ -26,7 +26,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
-// tutte le operazioni riguardano solo le candidature dell'account autenticato
 @RestController
 @RequestMapping("/api/candidatura")
 @RequiredArgsConstructor
@@ -46,7 +45,6 @@ public class CandidaturaController {
         return candidaturaService.update(CurrentAccount.id(jwt), id, dto);
     }
 
-    // cambia solo lo stato (es. dopo un colloquio)
     @PatchMapping("/{id}/stato")
     public CandidatureDTO updateStato(@PathVariable Long id, @Valid @RequestBody StatoUpdateDTO body,
             @AuthenticationPrincipal Jwt jwt) {
