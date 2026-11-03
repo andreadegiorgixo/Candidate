@@ -4,9 +4,14 @@ import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 
 @Entity (name = "CANDIDATURE")
 public class Candidature {
@@ -15,8 +20,8 @@ public class Candidature {
     @GeneratedValue (strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
-    @Column (name = "ID_ACCOUNT", nullable = false)
-    @OneToOne
+    @ManyToOne (fetch = FetchType.LAZY, optional = false)
+    @JoinColumn (name = "ID_ACCOUNT", nullable = false)
     private Account account;
 
     @Column (name = "NOME_AZIENDA", nullable = false)
@@ -25,24 +30,25 @@ public class Candidature {
     @Column (name = "POSIZIONE_LAVORATIVA", nullable = false)
     private String posizioneLavorativa;
 
-    @Column (name = "JOB_OFFERT", nullable = false)
+    @Column (name = "JOB_OFFERT", nullable = false, columnDefinition = "TEXT")
     private String jobOffert;
 
+    @Enumerated (EnumType.STRING)
     @Column (name = "MODALITA", nullable = false)
     private Modalita modalita;
 
-    @Column (name = "CITTÀ", nullable = false)
-    @OneToOne
+    @ManyToOne (fetch = FetchType.LAZY, optional = false)
+    @JoinColumn (name = "ID_CITTA", nullable = false)
     private Citta citta;
 
+    @Enumerated (EnumType.STRING)
     @Column (name = "STATO_CANDIDATURA", nullable = false)
-    @OneToOne
     private StatoCandidatura statoCandidatura;
     
     @Column (name = "DATA_CANDIDATURA", nullable = false)
     private LocalDate dataCandidatura;
 
-    @Column (name = "NOTE", nullable = true)
+    @Column (name = "NOTE", nullable = true, columnDefinition = "TEXT")
     private String note;
 
     @Column (name = "DATA_CREAZIONE", nullable = false)
@@ -67,6 +73,15 @@ public class Candidature {
         this.dataCandidatura = dataCandidatura;
         this.note = note;
         this.dataCreazione = dataCreazione;
+    }
+
+    //--------------------- CALLBACK JPA ---------------------//
+
+    @PrePersist
+    private void onCreate() {
+        if (dataCreazione == null) {
+            dataCreazione = LocalDate.now();
+        }
     }
 
     //--------------------- GETTER E SETTER ---------------------//

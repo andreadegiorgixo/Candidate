@@ -1,0 +1,152 @@
+.filtri {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0 12px;
+  margin-bottom: 26px;
+}
+
+.periodo {
+  display: inline-flex;
+  background: var(--sabbia);
+  border-radius: var(--r-pillola);
+  padding: 3px;
+  height: 40px;
+  margin-top: 4px;
+
+  button {
+    border: 0;
+    background: transparent;
+    border-radius: var(--r-pillola);
+    padding: 0 14px;
+    font-weight: 600;
+    color: var(--testo-2);
+
+    &[aria-pressed='true'] {
+      background: var(--bosco);
+      color: var(--lime);
+    }
+
+    &:not([aria-pressed='true']):hover {
+      color: var(--bosco);
+    }
+  }
+}
+
+.sel {
+  --mat-form-field-container-height: 40px;
+  --mat-form-field-container-vertical-padding: 8px;
+  width: 170px;
+}
+
+.conta {
+  margin-left: auto;
+  align-self: center;
+  font-size: 14px;
+}
+
+.blocco {
+  margin-bottom: 30px;
+}
+
+.segnali {
+  padding: 8px 26px 18px;
+
+  ul {
+    display: grid;
+  }
+
+  li {
+    font-size: 17px;
+    line-height: 1.4;
+    padding: 14px 0 14px 22px;
+    border-bottom: 1px solid var(--sabbia);
+    position: relative;
+    max-width: 78ch;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 22px;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      background: var(--bosco);
+    }
+  }
+
+  .avvertenza {
+    font-size: 13.5px;
+    margin-top: 12px;
+  }
+}
+
+.conversioni {
+  margin-top: 14px;
+  padding: 16px 22px 8px;
+
+  h3 {
+    font-size: 15px;
+    font-weight: 650;
+    margin-bottom: 4px;
+  }
+
+  dl > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--sabbia);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  dt {
+    color: var(--testo-2);
+  }
+
+  dd {
+    margin: 0;
+    text-align: right;
+  }
+}
+
+.quattro {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+.nota-barre {
+  margin-top: 10px;
+  font-size: 13.5px;
+}
+
+@media (max-width: 1050px) {
+  .quattro {
+    grid-template-columns: 1fr;
+  }
+
+  .conta {
+    margin-left: 0;
+    width: 100%;
+    margin-top: -4px;
+  }
+
+  .sel {
+    width: calc(50% - 6px);
+  }
+
+  .conversioni dl > div {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .conversioni dd {
+    text-align: left;
+  }
+}

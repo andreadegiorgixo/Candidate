@@ -1,0 +1,186 @@
+.salta {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 100;
+  background: var(--bosco);
+  color: var(--lime);
+  padding: 8px 16px;
+  border-radius: var(--r-pillola);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:focus {
+    top: 10px;
+  }
+}
+
+.app {
+  display: grid;
+  grid-template-columns: var(--larghezza-barra) 1fr;
+  min-height: 100vh;
+}
+
+.side {
+  background: var(--bosco);
+  color: var(--su-scuro);
+  padding: 22px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 2;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    color: inherit;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      background: var(--bosco-2);
+    }
+
+    &:focus-visible {
+      outline-color: var(--lime);
+    }
+
+    &[aria-current] {
+      background: var(--lime);
+      color: var(--bosco);
+      font-weight: 650;
+    }
+  }
+
+  .cerca {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 9px 12px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    border: 1px solid #2a4a28;
+    background: transparent;
+    color: var(--su-scuro-2);
+    font-weight: 500;
+    text-align: left;
+
+    &:hover {
+      background: var(--bosco-2);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--lime);
+      outline-offset: 2px;
+    }
+
+    kbd {
+      margin-left: auto;
+      font: inherit;
+      font-size: 12px;
+      border: 1px solid #3a5a37;
+      border-radius: 6px;
+      padding: 0 6px;
+    }
+  }
+
+  .logo {
+    font-weight: 800;
+    font-stretch: 112%;
+    font-size: 20px;
+    color: #fff;
+    padding: 2px 12px 22px;
+    gap: 9px;
+    border-radius: 12px;
+
+    &:hover {
+      background: transparent;
+    }
+
+    i {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 5px solid var(--lime);
+    }
+  }
+
+  .n {
+    margin-left: auto;
+    font-size: 12.5px;
+    font-weight: 650;
+    background: var(--bosco-2);
+    padding: 0 8px;
+    border-radius: var(--r-pillola);
+    min-width: 22px;
+    text-align: center;
+  }
+
+  a[aria-current] .n {
+    background: var(--bosco);
+    color: var(--lime);
+  }
+
+  .gap {
+    flex: 1;
+  }
+}
+
+main {
+  padding: 32px 40px 56px;
+  max-width: 1240px;
+  width: 100%;
+  min-width: 0;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+@media (max-width: 1050px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .side {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+    height: auto;
+    position: sticky;
+    top: 0;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .logo,
+    .gap,
+    .n,
+    .cerca kbd {
+      display: none;
+    }
+
+    .cerca {
+      margin: 0;
+      white-space: nowrap;
+      flex: none;
+    }
+
+    a {
+      white-space: nowrap;
+    }
+  }
+
+  main {
+    padding: 22px 18px 44px;
+  }
+}

@@ -1,0 +1,203 @@
+<app-testata titolo="Colloqui" sottotitolo="Prepararti prima, imparare da ognuno dopo.">
+  <button type="button" class="btn" (click)="modelloChecklist()">Modello di preparazione</button>
+  <button type="button" class="btn primario" (click)="aggiungi()">Aggiungi colloquio</button>
+</app-testata>
+
+@switch (stato()) {
+  @case ('errore') {
+    <app-errore-caricamento [errore]="errore()" (riprova)="ricarica()" />
+  }
+  @case ('pronto') {
+    <div class="schede" role="tablist" aria-label="Sezioni dei colloqui">
+      <button type="button" role="tab" id="tab-programma" [attr.aria-selected]="vista() === 'programma'" aria-controls="pannello" (click)="scegliVista('programma')">
+        In programma <span class="n">{{ suddivisi().inProgramma.length }}</span>
+      </button>
+      <button type="button" role="tab" id="tab-conclusi" [attr.aria-selected]="vista() === 'conclusi'" aria-controls="pannello" (click)="scegliVista('conclusi')">
+        Conclusi
+        @if (suddivisi().senzaResoconto.length) {
+          <span class="n avviso" [attr.aria-label]="suddivisi().senzaResoconto.length + ' senza resoconto'">{{ suddivisi().senzaResoconto.length }}</span>
+        }
+      </button>
+      <button type="button" role="tab" id="tab-domande" [attr.aria-selected]="vista() === 'domande'" aria-controls="pannello" (click)="scegliVista('domande')">
+        Domande ricevute <span class="n">{{ domande().length }}</span>
+      </button>
+    </div>
+
+    <div id="pannello" role="tabpanel" [attr.aria-labelledby]="'tab-' + vista()">
+      @switch (vista()) {
+        @case ('programma') {
+          @if (suddivisi().senzaResoconto.length) {
+            <div class="promemoria" role="status">
+              <span>
+                @if (suddivisi().senzaResoconto.length === 1) {
+                  C’è un colloquio concluso senza resoconto.
+                } @else {
+                  Ci sono {{ suddivisi().senzaResoconto.length }} colloqui conclusi senza resoconto.
+                }
+              </span>
+              <button type="button" class="btn piccolo" (click)="scegliVista('conclusi')">Scrivi i resoconti</button>
+            </div>
+          }
+          @if (suddivisi().inProgramma.length === 0) {
+            <app-stato-vuoto titolo="Non hai colloqui in programma" testo="Quando ne fissi uno, aggiungilo qui: avrai l’agenda e una checklist per prepararti.">
+              <button type="button" class="btn primario" (click)="aggiungi()">Aggiungi colloquio</button>
+            </app-stato-vuoto>
+          } @else {
+            <ul class="elenco">
+              @for (c of suddivisi().inProgramma; track c.id) {
+                <li>
+                  <article class="pann scheda" [id]="'colloquio-' + c.id" [class.evidenziata]="apri() === c.id">
+                    <div class="data" aria-hidden="true"><b>{{ giorno(c) }}</b>{{ mese(c) }}</div>
+                    <div class="corpo">
+                      <h2>
+                        <a [routerLink]="['/candidature', c.idCandidatura]">{{ azienda(c) }}</a>
+                      </h2>
+                      <p class="sotto">
+                        {{ etichettaTipo[c.tipo] }}, {{ ruolo(c) }}.
+                        <strong>{{ quando(c) }} alle {{ ora(c) }}</strong>
+                        <span class="solo-lettori">, {{ dataCompleta(c) }}</span>
+                      </p>
+                      <ul class="dettagli">
+                        @if (c.luogoOLink) {
+                          <li>
+                            <app-icona [nome]="eLink(c.luogoOLink) ? 'link' : 'luogo'" />
+                            @if (eLink(c.luogoOLink)) {
+                              <a [href]="c.luogoOLink" target="_blank" rel="noopener noreferrer">{{ c.luogoOLink }}</a>
+                            } @else {
+                              {{ c.luogoOLink }}
+                            }
+                          </li>
+                        }
+                        @if (c.persone) {
+                          <li><app-icona nome="persona" /> {{ c.persone }}</li>
+                        }
+                      </ul>
+                      @if (c.checklist.length) {
+                        <fieldset class="checklist">
+                          <legend>
+                            Preparazione, {{ avanzamento(c).fatte }} di {{ avanzamento(c).totale }}
+                          </legend>
+                          @for (v of c.checklist; track $index; let i = $index) {
+                            <label>
+                              <input type="checkbox" [checked]="v.fatto" (change)="spunta(c, i, spuntatoDa($event))" />
+                              <span [class.fatta]="v.fatto">{{ v.testo }}</span>
+                            </label>
+                          }
+                        </fieldset>
+                      }
+                    </div>
+                    <div class="az">
+                      <button type="button" class="btn piccolo" (click)="modifica(c)">Modifica</button>
+                      <button type="button" class="btn piccolo pericolo" (click)="elimina(c)">Elimina</button>
+                    </div>
+                  </article>
+                </li>
+              }
+            </ul>
+          }
+        }
+        @case ('conclusi') {
+          @if (suddivisi().conclusi.length === 0) {
+            <app-stato-vuoto titolo="Nessun colloquio concluso" testo="Dopo ogni colloquio ti chiederò un resoconto breve: come è andata, le domande ricevute e cosa migliorare." />
+          } @else {
+            <ul class="elenco">
+              @for (c of suddivisi().conclusi; track c.id) {
+                <li>
+                  <article class="pann scheda" [id]="'colloquio-' + c.id" [class.evidenziata]="apri() === c.id">
+                    <div class="data" aria-hidden="true"><b>{{ giorno(c) }}</b>{{ mese(c) }}</div>
+                    <div class="corpo">
+                      <h2>
+                        <a [routerLink]="['/candidature', c.idCandidatura]">{{ azienda(c) }}</a>
+                      </h2>
+                      <p class="sotto">{{ etichettaTipo[c.tipo] }}, {{ ruolo(c) }}. {{ dataCompleta(c) }}</p>
+                      @if (c.voto !== null) {
+                        <div class="voto-riga">
+                          <span class="pallini" role="img" [attr.aria-label]="'Come è andata: ' + c.voto + ' su 5'">
+                            @for (n of voti; track n) {
+                              <i [class.on]="n <= c.voto!"></i>
+                            }
+                          </span>
+                          <span class="tenue">{{ c.voto }} su 5</span>
+                        </div>
+                        @if (c.domande.length) {
+                          <h3>Domande ricevute</h3>
+                          <ul class="domande-lista">
+                            @for (d of c.domande; track $index) {
+                              <li>{{ d }}</li>
+                            }
+                          </ul>
+                        }
+                        @if (c.daMigliorare) {
+                          <h3>Da migliorare</h3>
+                          <p>{{ c.daMigliorare }}</p>
+                        }
+                      } @else {
+                        <div class="promemoria interno">
+                          <span>Com’è andato? Scrivi un resoconto breve mentre lo ricordi bene.</span>
+                          <button type="button" class="btn piccolo primario" (click)="modifica(c, 'resoconto')">Scrivi il resoconto</button>
+                        </div>
+                      }
+                    </div>
+                    <div class="az">
+                      <button type="button" class="btn piccolo" (click)="modifica(c, c.voto !== null ? 'resoconto' : 'dettagli')">
+                        {{ c.voto !== null ? 'Modifica resoconto' : 'Modifica' }}
+                      </button>
+                      <button type="button" class="btn piccolo pericolo" (click)="elimina(c)">Elimina</button>
+                    </div>
+                  </article>
+                </li>
+              }
+            </ul>
+          }
+        }
+        @case ('domande') {
+          @if (domande().length === 0) {
+            <app-stato-vuoto titolo="Non hai ancora registrato domande" testo="Scrivile nel resoconto dopo ogni colloquio. Dopo una decina di colloqui vedrai quali tornano.">
+              <button type="button" class="btn" (click)="scegliVista('conclusi')">Vai ai colloqui conclusi</button>
+            </app-stato-vuoto>
+          } @else {
+            <div class="filtri-domande">
+              <div class="cerca">
+                <app-icona nome="cerca" />
+                <input type="search" placeholder="Cerca tra le domande" aria-label="Cerca tra le domande" [value]="ricerca()" (input)="ricerca.set(testoDa($event))" />
+              </div>
+              <mat-form-field appearance="outline" class="sel">
+                <mat-label>Tipo di colloquio</mat-label>
+                <mat-select [value]="tipoDomanda()" (selectionChange)="tipoDomanda.set($event.value)">
+                  <mat-option value="">Tutti</mat-option>
+                  @for (t of tipi; track t) {
+                    <mat-option [value]="t">{{ etichettaTipo[t] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <p class="tenue conta" aria-live="polite">{{ domandeFiltrate().length }} {{ domandeFiltrate().length === 1 ? 'domanda' : 'domande' }}</p>
+            </div>
+            @if (domandeFiltrate().length === 0) {
+              <app-stato-vuoto titolo="Nessuna domanda corrisponde" testo="Prova con meno parole o scegli un altro tipo di colloquio." />
+            } @else {
+              <ul class="pann archivio">
+                @for (d of domandeFiltrate(); track d.testo) {
+                  <li>
+                    <p class="testo-domanda">{{ d.testo }}</p>
+                    <p class="meta tenue">
+                      @if (d.volte > 1) {
+                        <strong class="ricorre">Tornata {{ d.volte }} volte.</strong>
+                      }
+                      {{ d.aziende.join(', ') }}.
+                      @for (t of d.tipi; track t; let u = $last) {
+                        {{ etichettaTipo[t] }}{{ u ? '' : ', ' }}
+                      }
+                    </p>
+                  </li>
+                }
+              </ul>
+            }
+          }
+        }
+      }
+    </div>
+  }
+  @default {
+    <app-scheletro etichetta="Sto caricando i colloqui" [righe]="[1, 2, 3]" />
+  }
+}

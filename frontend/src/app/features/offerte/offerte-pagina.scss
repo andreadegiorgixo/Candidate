@@ -1,0 +1,129 @@
+/* `position: relative` contiene anche gli elementi nascosti ai lettori, che altrimenti allargano la pagina. */
+.scorri {
+  position: relative;
+  overflow-x: auto;
+  max-width: 100%;
+  border-radius: var(--r-pannello);
+}
+
+.confronto {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  min-width: calc(180px + var(--colonne, 2) * 240px);
+
+  thead td,
+  thead th {
+    padding: 18px 20px 14px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--bordo);
+  }
+
+  thead td {
+    width: 180px;
+  }
+
+  th[scope='col'] {
+    position: relative;
+    display: table-cell;
+
+    .azienda {
+      display: block;
+      font-size: 18px;
+      font-weight: 750;
+      color: var(--bosco);
+      text-decoration: none;
+      padding-right: 70px;
+
+      &:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+    }
+
+    .ruolo {
+      display: block;
+      font-weight: 400;
+      color: var(--testo-2);
+      font-size: 14px;
+    }
+
+    .az {
+      position: absolute;
+      right: 10px;
+      top: 12px;
+      display: flex;
+    }
+  }
+
+  tbody th[scope='row'] {
+    text-align: left;
+    font-weight: 600;
+    color: var(--testo-2);
+    font-size: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--sabbia);
+    vertical-align: top;
+  }
+
+  tbody td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--sabbia);
+    vertical-align: top;
+    font-size: 16px;
+  }
+
+  tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+
+  .testo-lungo {
+    font-size: 14.5px;
+  }
+}
+
+.migliore {
+  background: var(--lime);
+  color: var(--bosco);
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 1px 9px;
+  display: inline-block;
+}
+
+.legenda {
+  margin-top: 12px;
+  font-size: 13.5px;
+}
+
+/* Su schermi stretti le etichette di riga restano ferme mentre le proposte scorrono. */
+@media (max-width: 700px) {
+  .confronto {
+    min-width: calc(112px + var(--colonne, 2) * 230px);
+
+    thead td {
+      width: 112px;
+      position: sticky;
+      left: 0;
+      background: var(--bianco);
+      z-index: 1;
+    }
+
+    tbody th[scope='row'] {
+      position: sticky;
+      left: 0;
+      background: var(--bianco);
+      z-index: 1;
+      width: 112px;
+      padding-inline: 14px 8px;
+      font-size: 13px;
+    }
+
+    tbody th[scope='row'],
+    thead td {
+      box-shadow: 1px 0 0 var(--sabbia);
+    }
+  }
+}

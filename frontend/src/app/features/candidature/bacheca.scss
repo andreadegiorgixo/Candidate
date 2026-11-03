@@ -1,0 +1,149 @@
+/* `position: relative` contiene anche gli elementi nascosti ai lettori, che altrimenti allargano la pagina. */
+.scorri {
+  position: relative;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin: 10px -4px 0;
+  padding-inline: 4px;
+}
+
+.bacheca {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(170px, 1fr));
+  gap: 12px;
+  align-items: start;
+  min-width: 1060px;
+}
+
+.colonna {
+  background: var(--sabbia);
+  border-radius: var(--r-pannello);
+  padding: 12px 10px 10px;
+  min-height: 160px;
+}
+
+h2.t {
+  font-size: 14.5px;
+  margin: 2px 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.n {
+  background: var(--bianco);
+  border-radius: var(--r-pillola);
+  padding: 0 8px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--testo-2);
+}
+
+.lista {
+  display: grid;
+  gap: 8px;
+  min-height: 80px;
+  align-content: start;
+}
+
+.scheda {
+  background: var(--bianco);
+  border: 1px solid var(--bordo);
+  border-radius: 16px;
+  padding: 11px 12px;
+  display: grid;
+  gap: 3px;
+  cursor: grab;
+
+  .testa {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .azienda {
+    font-weight: 650;
+    color: var(--bosco);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+
+  .btn-icona {
+    width: 28px;
+    height: 28px;
+    margin: -4px -6px 0 0;
+    flex: none;
+  }
+
+  .ruolo {
+    font-size: 13.5px;
+  }
+
+  small {
+    color: var(--testo-2);
+    font-size: 12.5px;
+  }
+
+  .azione {
+    color: var(--bosco);
+    border-top: 1px solid var(--sabbia);
+    padding-top: 5px;
+    margin-top: 3px;
+  }
+
+  .tag {
+    justify-self: start;
+    margin-top: 3px;
+  }
+}
+
+.nessuna {
+  color: var(--testo-2);
+  font-size: 13.5px;
+  padding: 8px 6px;
+}
+
+.titolo-menu {
+  padding: 8px 16px 2px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--testo-2);
+}
+
+.fuori {
+  margin-top: 14px;
+}
+
+/* Trascinamento (l'anteprima è in styles/_componenti.scss) */
+.cdk-drag-placeholder {
+  opacity: 0.35;
+}
+
+.cdk-drag-animating {
+  transition: transform 180ms ease;
+}
+
+.lista.cdk-drop-list-dragging {
+  outline: 2px dashed #8b917f;
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+@media (max-width: 700px) {
+  .scorri {
+    overflow: visible;
+    margin: 10px 0 0;
+    padding: 0;
+  }
+
+  .bacheca {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+}

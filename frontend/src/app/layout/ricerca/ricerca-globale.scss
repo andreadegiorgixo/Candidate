@@ -1,0 +1,84 @@
+:host {
+  display: block;
+}
+
+.campo-ricerca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  height: 58px;
+  border-bottom: 1px solid var(--sabbia);
+  color: var(--testo-2);
+
+  input {
+    flex: 1;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-size: 17px;
+    color: var(--bosco);
+    height: 100%;
+    min-width: 0;
+
+    &::placeholder {
+      color: var(--testo-2);
+    }
+  }
+
+  &:focus-within {
+    box-shadow: inset 0 -2px 0 var(--verde-testo);
+  }
+
+  kbd {
+    font: inherit;
+    font-size: 12px;
+    border: 1px solid var(--bordo);
+    border-radius: 6px;
+    padding: 1px 7px;
+  }
+}
+
+.risultati {
+  max-height: min(56vh, 420px);
+  overflow-y: auto;
+  padding: 6px 8px 10px;
+}
+
+.gruppo {
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--testo-2);
+  padding: 10px 10px 4px;
+}
+
+.voce {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  border-radius: 12px;
+  padding: 9px 10px;
+
+  .testi {
+    display: grid;
+    min-width: 0;
+  }
+
+  small {
+    color: var(--testo-2);
+    font-size: 13px;
+  }
+
+  &.attivo {
+    background: var(--sabbia);
+  }
+}
+
+.nessuno {
+  padding: 26px 18px;
+  color: var(--testo-2);
+}

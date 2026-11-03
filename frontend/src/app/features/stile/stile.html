@@ -1,0 +1,172 @@
+<app-testata titolo="Stile" sottotitolo="Tutti i componenti condivisi, nei loro stati. Visibile solo in sviluppo.">
+  <button type="button" class="btn primario" (click)="snackbarAnnulla()">Mostra annulla</button>
+</app-testata>
+
+<section class="blocco">
+  <h2 class="t">Colori</h2>
+  <ul class="swatch">
+    @for (s of swatch; track s.nome) {
+      <li>
+        <span class="campione" [style.background]="s.valore" [class.chiaro]="s.chiaro"></span>
+        <strong>{{ s.nome }}</strong>
+        <span class="cifre">{{ s.valore }}</span>
+        <small>{{ s.uso }}</small>
+      </li>
+    }
+  </ul>
+</section>
+
+<section class="blocco">
+  <h2 class="t">Tipografia</h2>
+  <div class="pann tipo">
+    <h1>Oggi hai 4 cose da fare</h1>
+    <p>Testo a 15px in Mona Sans. Le cifre tabellari compaiono solo nelle colonne numeriche: 1.234 e 56,7%.</p>
+    <p class="tenue">Testo secondario in --testo-2, per le descrizioni e le date.</p>
+    <p class="cifre">Tabellari, 0123456789</p>
+  </div>
+</section>
+
+<section class="blocco">
+  <h2 class="t">Pulsanti</h2>
+  <div class="riga-pulsanti">
+    <button type="button" class="btn primario">Salva candidatura</button>
+    <button type="button" class="btn">Annulla</button>
+    <button type="button" class="btn pericolo" (click)="conferma()">Elimina candidatura</button>
+    <button type="button" class="btn piccolo primario">Apri preparazione</button>
+    <button type="button" class="btn piccolo">Segna come fatto</button>
+    <button type="button" class="btn testo">Altri dettagli</button>
+    <button type="button" class="btn" disabled>Disabilitato</button>
+    <button type="button" class="btn-icona" aria-label="Altre azioni" [matMenuTriggerFor]="menu"><app-icona nome="altro" /></button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item type="button">Rifiutata dall’azienda</button>
+      <button mat-menu-item type="button">Ritirata da te</button>
+      <button mat-menu-item type="button">Senza risposta</button>
+    </mat-menu>
+    <button type="button" class="btn piccolo" (click)="snackbarErrore()">Mostra errore</button>
+  </div>
+</section>
+
+<section class="blocco">
+  <h2 class="t">Icone</h2>
+  <ul class="icone">
+    @for (i of icone; track i) {
+      <li><app-icona [nome]="i" /><small>{{ i }}</small></li>
+    }
+  </ul>
+</section>
+
+<section class="blocco">
+  <h2 class="t">Etichette di stato</h2>
+  <div class="tag-lista">
+    @for (s of stati; track s) {
+      <app-stato-tag [stato]="s" />
+    }
+  </div>
+</section>
+
+<section class="blocco">
+  <h2 class="t">La linea, in grande</h2>
+  <app-linea-banda titolo="Dove si trovano le 22 candidature ancora in corso" [conteggi]="conteggi" [uscite]="uscite" />
+</section>
+
+<section class="blocco">
+  <h2 class="t">La linea, piccola</h2>
+  <div class="pann">
+    @for (e of esempi; track e.titolo) {
+      <div class="riga">
+        <div>
+          <strong>{{ e.titolo }}</strong>
+          <app-percorso [stato]="e.stato" [storico]="e.storico" [dataCandidatura]="e.storico[0].dataEvento" />
+        </div>
+        <app-stato-tag [stato]="e.stato" />
+      </div>
+    }
+  </div>
+</section>
+
+<section class="blocco">
+  <h2 class="t">La linea, come cronologia</h2>
+  <div class="pann padd">
+    <app-percorso variante="cronologia" [stato]="esempi[2].stato" [storico]="esempi[2].storico" [dataCandidatura]="esempi[2].storico[0].dataEvento" />
+  </div>
+  <div class="pann padd spazio">
+    <app-percorso variante="cronologia" [stato]="esempi[4].stato" [storico]="esempi[4].storico" [dataCandidatura]="esempi[4].storico[0].dataEvento" />
+  </div>
+</section>
+
+<section class="blocco">
+  <h2 class="t">Campi e selezioni (Angular Material)</h2>
+  <div class="pann padd campi">
+    <mat-form-field appearance="outline">
+      <mat-label>Azienda</mat-label>
+      <input matInput [formControl]="testo" />
+      <mat-hint>Come compare nell’annuncio.</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Modalità</mat-label>
+      <mat-select [formControl]="scelta">
+        <mat-option value="REMOTO">Da remoto</mat-option>
+        <mat-option value="IBRIDO">Ibrido</mat-option>
+        <mat-option value="INSEDE">In sede</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Data di invio</mat-label>
+      <input matInput [matDatepicker]="dp" [formControl]="data" />
+      <mat-datepicker-toggle matIconSuffix [for]="dp" />
+      <mat-datepicker #dp />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Città</mat-label>
+      <input matInput [formControl]="citta" [matAutocomplete]="ac" />
+      <mat-autocomplete #ac="matAutocomplete">
+        @for (c of opzioniCitta; track c) {
+          <mat-option [value]="c">{{ c }}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+    <div class="campo invalido">
+      <label for="nativo">Campo nativo con errore</label>
+      <input id="nativo" value="" aria-describedby="nativo-err" />
+      <span class="errore-campo" id="nativo-err">Indica l’azienda a cui hai scritto.</span>
+    </div>
+  </div>
+</section>
+
+<section class="blocco due">
+  <div>
+    <h2 class="t">Stato vuoto</h2>
+    <app-stato-vuoto titolo="Non hai ancora candidature" testo="Aggiungi la prima: bastano azienda, ruolo e data di invio.">
+      <button type="button" class="btn primario">Aggiungi candidatura</button>
+    </app-stato-vuoto>
+  </div>
+  <div>
+    <h2 class="t">Errore di caricamento</h2>
+    <app-errore-caricamento (riprova)="snackbarErrore()" />
+  </div>
+</section>
+
+<section class="blocco due">
+  <div>
+    <h2 class="t">Caricamento</h2>
+    <app-scheletro />
+  </div>
+  <div>
+    <h2 class="t">Tabella dati</h2>
+    <div class="pann padd">
+      <app-tabella-dati [modello]="tabella" didascalia="Candidature e risposte per modalità" />
+    </div>
+  </div>
+</section>
+
+<section class="blocco">
+  <h2 class="t">Grafico</h2>
+  <app-grafico
+    titolo="Le candidature da remoto ricevono più risposte"
+    descrizione="Tasso di risposta per modalità: da remoto 42%, ibrido 39%, in sede 22%."
+    [opzioni]="opzioniGrafico()"
+    [tabella]="tabella"
+    [altezza]="170"
+    nota="Calcolato sulle candidature inviate da almeno 14 giorni."
+  />
+</section>

@@ -6,4 +6,5 @@ import com.candidate.entity.Account;
 public interface AccountMapper {
     AccountDTO toDTO(Account account);
     Account toEntity(AccountDTO accountDTO);
+    void updateEntity(AccountDTO accountDTO, Account account);
 }

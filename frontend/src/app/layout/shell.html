@@ -1,0 +1,28 @@
+<a class="salta" href="#contenuto" (click)="salta($event)">Vai al contenuto</a>
+<div class="app">
+  <nav class="side" aria-label="Navigazione principale">
+    <a class="logo" routerLink="/oggi" aria-label="Candidate, vai a Oggi"><i></i>Candidate</a>
+    <button type="button" class="cerca" (click)="cerca()" aria-label="Cerca in tutta l’app, scorciatoia {{ scorciatoiaCerca }}">
+      <app-icona nome="cerca" />
+      Cerca
+      <kbd aria-hidden="true">{{ scorciatoiaCerca }}</kbd>
+    </button>
+    @for (v of voci; track v.percorso) {
+      <a [routerLink]="v.percorso" routerLinkActive="attiva" #rla="routerLinkActive" [attr.aria-current]="rla.isActive ? 'page' : null">
+        <app-icona [nome]="v.icona" />
+        {{ v.etichetta }}
+        @if (v.contatore && contatori()[v.contatore] > 0) {
+          <span class="n" [attr.aria-label]="v.descrizioneContatore!(contatori()[v.contatore])">{{ contatori()[v.contatore] }}</span>
+        }
+      </a>
+    }
+    <div class="gap"></div>
+    <a routerLink="/profilo" routerLinkActive="attiva" #rlp="routerLinkActive" [attr.aria-current]="rlp.isActive ? 'page' : null">
+      <app-icona nome="profilo" />
+      Profilo
+    </a>
+  </nav>
+  <main id="contenuto" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>

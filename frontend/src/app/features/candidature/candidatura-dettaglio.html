@@ -1,0 +1,135 @@
+<a routerLink="/candidature" class="indietro"><app-icona nome="ordina-su" class="ruota" /> Tutte le candidature</a>
+
+@if (candidatura(); as c) {
+  <header class="testata">
+    <div>
+      <h1>{{ c.nomeAzienda }}</h1>
+      <p class="sotto">
+        {{ c.posizioneLavorativa }}, {{ c.citta.nomeCitta }}
+        <app-stato-tag [stato]="c.statoCandidatura" />
+      </p>
+    </div>
+    <div class="azioni">
+      <button type="button" class="btn" (click)="scrivi()"><app-icona nome="copia" /> Scrivi un messaggio</button>
+      <button type="button" class="btn pericolo" (click)="elimina()">Elimina candidatura</button>
+    </div>
+  </header>
+
+  <section class="pann padd linea" aria-labelledby="t-percorso">
+    <h2 class="t" id="t-percorso">Percorso</h2>
+    <app-percorso variante="cronologia" [stato]="c.statoCandidatura" [storico]="storico()" [dataCandidatura]="c.dataCandidatura" />
+  </section>
+
+  <div class="colonne">
+    <section aria-labelledby="t-dettagli">
+      <h2 class="t" id="t-dettagli">Dettagli</h2>
+      <div class="pann padd">
+        @if (form(); as f) {
+          <app-campi-candidatura [form]="f" [altri]="true" [conStato]="true" [escludiId]="c.id" />
+          @if (urlAnnuncio(); as url) {
+            <p class="link-annuncio">
+              <a [href]="url" target="_blank" rel="noopener noreferrer"><app-icona nome="link" /> Apri il link</a>
+            </p>
+          }
+          <div class="salva">
+            <button type="button" class="btn primario" (click)="salva()" [disabled]="!modificato() || salvataggio()">
+              {{ salvataggio() ? 'Salvataggio in corso' : 'Salva modifiche' }}
+            </button>
+            <button type="button" class="btn" (click)="annulla()" [disabled]="!modificato() || salvataggio()">Annulla modifiche</button>
+          </div>
+        }
+      </div>
+    </section>
+
+    <div class="laterale">
+      <section aria-labelledby="t-azione">
+        <h2 class="t" id="t-azione">Prossima azione</h2>
+        <div class="pann padd">
+          @if (c.prossimaAzioneTesto) {
+            <p class="az-testo">{{ c.prossimaAzioneTesto }}</p>
+            @if (dataAzione()) {
+              <p class="tenue">Entro {{ dataAzione() }}</p>
+            }
+            <button type="button" class="btn piccolo" (click)="segnaFatta()">Segna come fatto</button>
+          } @else {
+            <p class="tenue">Nessuna azione in programma. Puoi aggiungerla dai dettagli a sinistra.</p>
+          }
+        </div>
+      </section>
+
+      <section aria-labelledby="t-colloqui">
+        <h2 class="t" id="t-colloqui">Colloqui</h2>
+        <div class="pann">
+          @for (k of colloqui(); track k.id) {
+            <div class="riga">
+              <div>
+                <strong>{{ etichettaTipo[k.tipo] }}, {{ quando(k) }}</strong>
+                <small>{{ k.luogoOLink || 'Luogo da definire' }}</small>
+                @if (k.voto) {
+                  <small>Come è andata: {{ k.voto }} su 5</small>
+                }
+              </div>
+              <div class="az">
+                @if (!futuro(k) && !k.voto) {
+                  <button type="button" class="btn piccolo primario" (click)="modificaColloquio(k, 'resoconto')">Scrivi il resoconto</button>
+                }
+                <button type="button" class="btn piccolo" (click)="modificaColloquio(k)">Modifica</button>
+              </div>
+            </div>
+          } @empty {
+            <p class="vuoto-interno">Nessun colloquio per questa candidatura.</p>
+          }
+          <div class="piede"><button type="button" class="btn piccolo" (click)="nuovoColloquio()"><app-icona nome="piu" /> Aggiungi colloquio</button></div>
+        </div>
+      </section>
+
+      <section aria-labelledby="t-contatti">
+        <h2 class="t" id="t-contatti">Contatti in {{ c.nomeAzienda }}</h2>
+        <div class="pann">
+          @for (p of contatti(); track p.id) {
+            <div class="riga">
+              <div>
+                <strong>{{ p.nome }}</strong>
+                <small>{{ p.ruolo }}</small>
+                @if (p.email) {
+                  <small><a [href]="'mailto:' + p.email">{{ p.email }}</a></small>
+                }
+                @if (p.linkedin) {
+                  <small><a [href]="p.linkedin" target="_blank" rel="noopener noreferrer">LinkedIn</a></small>
+                }
+                @if (p.note) {
+                  <small>{{ p.note }}</small>
+                }
+              </div>
+              <div class="az">
+                <button type="button" class="btn-icona" (click)="modificaContatto(p)" [attr.aria-label]="'Modifica ' + p.nome"><app-icona nome="modifica" /></button>
+                <button type="button" class="btn-icona" (click)="togliContatto(p)" [attr.aria-label]="'Togli ' + p.nome"><app-icona nome="elimina" /></button>
+              </div>
+            </div>
+          } @empty {
+            <p class="vuoto-interno">Non hai ancora salvato nessun contatto per questa azienda.</p>
+          }
+          <div class="piede"><button type="button" class="btn piccolo" (click)="nuovoContatto()"><app-icona nome="piu" /> Aggiungi contatto</button></div>
+        </div>
+      </section>
+
+      @if (nomeCv()) {
+        <p class="tenue cv">CV usato: {{ nomeCv() }}</p>
+      }
+    </div>
+  </div>
+} @else {
+  @switch (store.stato()) {
+    @case ('errore') {
+      <app-errore-caricamento [errore]="store.errore()" (riprova)="store.carica(true)" />
+    }
+    @case ('pronto') {
+      <app-stato-vuoto titolo="Questa candidatura non esiste più" testo="Può essere stata eliminata. Torna all’elenco per cercarla.">
+        <a routerLink="/candidature" class="btn primario">Vai alle candidature</a>
+      </app-stato-vuoto>
+    }
+    @default {
+      <app-scheletro etichetta="Sto caricando la candidatura" [righe]="[1, 2, 3]" />
+    }
+  }
+}

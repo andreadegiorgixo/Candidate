@@ -1,0 +1,141 @@
+.cerca {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 42px;
+  max-width: 420px;
+  margin-bottom: 16px;
+
+  app-icona {
+    position: absolute;
+    left: 13px;
+    color: var(--testo-2);
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #8b917f;
+    border-radius: var(--r-campo);
+    padding: 0 12px 0 38px;
+    background: var(--bianco);
+
+    &:hover {
+      border-color: var(--testo-2);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--verde-testo);
+      outline-offset: 1px;
+      border-color: var(--verde-testo);
+    }
+  }
+}
+
+.tabella {
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--sabbia);
+  vertical-align: middle;
+}
+
+thead th {
+  background: var(--avorio);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--testo-2);
+  padding-block: 10px;
+}
+
+tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+tbody tr:hover {
+  background: #fbfbf4;
+}
+
+tbody th {
+  font-weight: 400;
+
+  a {
+    display: block;
+    font-weight: 650;
+    color: var(--bosco);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+
+  .ruoli {
+    font-size: 13.5px;
+  }
+}
+
+.num {
+  text-align: right;
+  width: 130px;
+}
+
+@media (max-width: 1050px) {
+  .tabella {
+    background: transparent;
+    border: 0;
+    overflow: visible;
+  }
+
+  table,
+  tbody,
+  tr,
+  th,
+  td {
+    display: block;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  tbody tr {
+    background: var(--bianco);
+    border: 1px solid var(--bordo);
+    border-radius: var(--r-pannello);
+    padding: 14px 16px;
+  }
+
+  th,
+  td {
+    border: 0 !important;
+    padding: 2px 0;
+    text-align: left;
+    width: auto;
+  }
+
+  [data-etichetta]::before {
+    content: attr(data-etichetta) ': ';
+    color: var(--testo-2);
+  }
+
+  app-stato-tag {
+    display: inline-block;
+  }
+}

@@ -1,0 +1,86 @@
+<app-testata titolo="Materiali" sottotitolo="Le versioni del tuo CV e i messaggi che usi più spesso." />
+
+@switch (stato()) {
+  @case ('errore') {
+    <app-errore-caricamento [errore]="errore()" (riprova)="ricarica()" />
+  }
+  @case ('pronto') {
+    <section class="blocco" aria-labelledby="t-cv">
+      <div class="intesta">
+        <h2 class="t" id="t-cv">Versioni del CV</h2>
+        <button type="button" class="btn piccolo" (click)="nuovoCv()"><app-icona nome="piu" /> Aggiungi versione</button>
+      </div>
+      @if (cv().length === 0) {
+        <app-stato-vuoto titolo="Non hai ancora versioni del CV" testo="Aggiungi il link a ogni versione che usi: poi vedrai quale riceve più risposte.">
+          <button type="button" class="btn primario" (click)="nuovoCv()">Aggiungi la prima versione</button>
+        </app-stato-vuoto>
+      } @else {
+        <ul class="pann">
+          @for (r of cv(); track r.cv.id) {
+            <li class="riga">
+              <div>
+                <strong>{{ r.cv.nome }}</strong>
+                @if (r.cv.url) {
+                  <small><a [href]="r.cv.url" target="_blank" rel="noopener noreferrer">{{ r.cv.url }}</a></small>
+                } @else {
+                  <small>Nessun link salvato</small>
+                }
+                <p class="stat">
+                  @if (r.n === 0) {
+                    <span class="tenue">Non l’hai ancora usata per nessuna candidatura.</span>
+                  } @else {
+                    <span><b>{{ r.n }}</b> {{ r.n === 1 ? 'candidatura inviata' : 'candidature inviate' }}</span>
+                    <span>
+                      Tasso di risposta <b>{{ percentuale(r.tasso ?? 0) }}%</b>
+                      @if (r.n < 5) {
+                        <span class="tag pochi">pochi dati</span>
+                      }
+                    </span>
+                  }
+                </p>
+              </div>
+              <div class="az">
+                <button type="button" class="btn piccolo" (click)="modificaCv(r.cv)">Modifica</button>
+                <button type="button" class="btn piccolo pericolo" (click)="eliminaCv(r.cv, r.n)">Elimina</button>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="blocco" aria-labelledby="t-modelli">
+      <div class="intesta">
+        <h2 class="t" id="t-modelli">Modelli di messaggio</h2>
+        <button type="button" class="btn piccolo" (click)="nuovoModello()"><app-icona nome="piu" /> Aggiungi modello</button>
+      </div>
+      @if (gruppi().length === 0) {
+        <app-stato-vuoto titolo="Non hai ancora modelli" testo="Scrivi una volta un sollecito, un ringraziamento o un messaggio spontaneo: poi lo riapri da ogni candidatura, già compilato.">
+          <button type="button" class="btn primario" (click)="nuovoModello()">Aggiungi il primo modello</button>
+        </app-stato-vuoto>
+      } @else {
+        @for (g of gruppi(); track g.tipo) {
+          <h3 class="gruppo">{{ tipoEtichetta[g.tipo] }}</h3>
+          <ul class="modelli">
+            @for (m of g.modelli; track m.id) {
+              <li class="pann modello">
+                <div class="testa">
+                  <strong>{{ m.nome }}</strong>
+                  <div class="az">
+                    <button type="button" class="btn piccolo primario" (click)="copia(m)"><app-icona nome="copia" /> Copia testo</button>
+                    <button type="button" class="btn piccolo" (click)="modificaModello(m)">Modifica</button>
+                    <button type="button" class="btn piccolo pericolo" (click)="eliminaModello(m)">Elimina</button>
+                  </div>
+                </div>
+                <pre>{{ m.testo }}</pre>
+              </li>
+            }
+          </ul>
+        }
+      }
+    </section>
+  }
+  @default {
+    <app-scheletro etichetta="Sto caricando i materiali" [righe]="[1, 2, 3]" />
+  }
+}

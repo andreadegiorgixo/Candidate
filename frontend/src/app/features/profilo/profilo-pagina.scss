@@ -1,0 +1,59 @@
+.griglia {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  align-items: start;
+}
+
+.blocco {
+  padding: 22px 26px 24px;
+
+  h2.t {
+    margin-bottom: 16px;
+  }
+
+  p {
+    margin-bottom: 14px;
+    max-width: 62ch;
+  }
+
+  form {
+    display: grid;
+    gap: 16px;
+    justify-items: start;
+
+    mat-form-field {
+      justify-self: stretch;
+    }
+  }
+
+  &.pericolo {
+    border-color: #e5b8b4;
+    grid-column: 1 / -1;
+
+    h2.t {
+      color: var(--errore);
+    }
+
+    mat-form-field {
+      max-width: 420px;
+    }
+  }
+}
+
+.coppia {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+  justify-self: stretch;
+}
+
+@media (max-width: 1050px) {
+  .griglia {
+    grid-template-columns: 1fr;
+  }
+
+  .coppia {
+    grid-template-columns: 1fr;
+  }
+}

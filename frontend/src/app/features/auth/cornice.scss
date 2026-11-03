@@ -1,0 +1,123 @@
+.pagina {
+  display: grid;
+  grid-template-columns: minmax(340px, 5fr) 6fr;
+  min-height: 100vh;
+}
+
+.marchio {
+  background: var(--bosco);
+  color: #fff;
+  padding: 36px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-stretch: 112%;
+  font-size: 22px;
+
+  i {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 5px solid var(--lime);
+  }
+}
+
+.frase {
+  font-size: 44px;
+  line-height: 1.04;
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+  max-width: 11ch;
+}
+
+.linea {
+  display: flex;
+  align-items: center;
+  margin: 36px 0 18px;
+  position: relative;
+  max-width: 340px;
+  justify-content: space-between;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 5px;
+    margin-top: -2.5px;
+    background: linear-gradient(90deg, var(--lime) 0 62%, var(--linea-spenta) 62%);
+    border-radius: 3px;
+  }
+
+  li {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bosco);
+    border: 5px solid var(--lime);
+
+    &:nth-child(n + 5) {
+      border-color: var(--linea-spenta);
+    }
+  }
+}
+
+.didascalia {
+  color: var(--su-scuro-2);
+  max-width: 34ch;
+}
+
+.modulo {
+  display: grid;
+  place-items: center;
+  padding: 40px 24px;
+  background:
+    radial-gradient(60% 50% at 85% 8%, rgb(203 249 73 / 0.42), transparent 70%),
+    radial-gradient(50% 40% at 10% 100%, rgb(203 249 73 / 0.22), transparent 70%),
+    var(--avorio);
+}
+
+.contenuto {
+  width: 100%;
+  max-width: 420px;
+  display: grid;
+  gap: 4px;
+}
+
+h1 {
+  font-size: 34px;
+}
+
+.sotto {
+  color: var(--testo-2);
+  margin-bottom: 22px;
+}
+
+@media (max-width: 860px) {
+  .pagina {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .marchio {
+    padding: 18px 20px;
+  }
+
+  .testo {
+    display: none;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+}

@@ -1,0 +1,113 @@
+<app-testata [titolo]="stato() === 'pronto' ? titolo() : 'Oggi'" [sottotitolo]="data()">
+  <button type="button" class="btn primario" (click)="aggiungi()">Aggiungi candidatura</button>
+</app-testata>
+
+@switch (stato()) {
+  @case ('errore') {
+    <app-errore-caricamento [errore]="errore()" (riprova)="ricarica()" />
+  }
+  @case ('pronto') {
+    @if (tutte().length === 0) {
+      <app-stato-vuoto titolo="Non hai ancora candidature" testo="Aggiungi la prima: qui vedrai a che punto sei e cosa fare ogni giorno.">
+        <button type="button" class="btn primario" (click)="aggiungi()">Aggiungi la prima candidatura</button>
+      </app-stato-vuoto>
+    } @else {
+      <app-linea-banda [titolo]="titoloLinea()" [conteggi]="conteggi()" [uscite]="uscite()" />
+
+      <div class="col">
+        <section aria-labelledby="t-da-fare">
+          <h2 class="t" id="t-da-fare">Da fare</h2>
+          @if (daFare().length === 0) {
+            <app-stato-vuoto titolo="Non c’è niente da fare per oggi" testo="Nessun colloquio vicino, nessuna scadenza e nessuna candidatura ferma da troppo. Puoi mandare un’altra candidatura.">
+              <button type="button" class="btn primario" (click)="aggiungi()">Aggiungi candidatura</button>
+            </app-stato-vuoto>
+          } @else {
+            <ul class="pann">
+              @for (v of daFare(); track v.chiave) {
+                @let c = candidatura(v);
+                <li class="riga">
+                  <div>
+                    <strong>{{ v.titolo }}</strong>
+                    <small>{{ v.dettaglio }}</small>
+                    <app-percorso [stato]="c.statoCandidatura" [dataCandidatura]="c.dataCandidatura" class="mini-riga" />
+                    <app-stato-tag [stato]="c.statoCandidatura" />
+                  </div>
+                  <div class="az">
+                    @switch (v.tipo) {
+                      @case ('colloquio') {
+                        <button type="button" class="btn piccolo primario" (click)="apriPreparazione(v)">Apri preparazione</button>
+                      }
+                      @case ('offerta') {
+                        <a class="btn piccolo primario" routerLink="/offerte">Confronta offerte</a>
+                      }
+                      @case ('azione') {
+                        <button type="button" class="btn piccolo" (click)="segnaFatta(v)">Segna come fatto</button>
+                      }
+                      @case ('attesa') {
+                        <button type="button" class="btn piccolo" (click)="scriviSollecito(v)">Scrivi un sollecito</button>
+                        <button type="button" class="btn piccolo" (click)="segnaSenzaRisposta(v)">Segna senza risposta</button>
+                      }
+                    }
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <div class="dx">
+          <section aria-labelledby="t-colloqui">
+            <h2 class="t" id="t-colloqui">Prossimi colloqui</h2>
+            @if (prossimi().length === 0) {
+              <app-stato-vuoto titolo="Nessun colloquio in programma" testo="Quando ne fissi uno, lo trovi qui con la checklist per prepararti.">
+                <a class="btn piccolo" routerLink="/colloqui">Vai ai colloqui</a>
+              </app-stato-vuoto>
+            } @else {
+              <ul class="pann">
+                @for (k of prossimi(); track k.id) {
+                  <li>
+                    <a class="coll" [routerLink]="['/colloqui']" [queryParams]="{ apri: k.id }">
+                      <span class="data" aria-hidden="true"><b>{{ giorno(k.dataOra) }}</b>{{ mese(k.dataOra) }}</span>
+                      <span>
+                        <strong>{{ nomeAzienda(k.idCandidatura) }}</strong><br />
+                        <small>{{ dettaglioColloquio(k) }}</small>
+                        <span class="solo-lettori">, {{ quando(k.dataOra) }}</span>
+                      </span>
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+
+          <section aria-labelledby="t-settimana">
+            <h2 class="t" id="t-settimana">Questa settimana</h2>
+            <div class="pann set">
+              <p class="cifra">
+                {{ settimana().inviate }}
+                <span>{{ settimana().inviate === 1 ? 'candidatura inviata' : 'candidature inviate' }} su {{ settimana().obiettivo }}</span>
+              </p>
+              <div class="tacche" aria-hidden="true">
+                @for (t of tacche; track t) {
+                  <i [class.on]="t < settimana().tacche"></i>
+                }
+              </div>
+              <small>
+                @if (settimana().obiettivo === 0) {
+                  Non hai fissato un obiettivo. Puoi farlo dal Profilo.
+                } @else if (settimana().mancano === 0) {
+                  Obiettivo raggiunto per questa settimana.
+                } @else {
+                  Ne {{ settimana().mancano === 1 ? 'manca 1' : 'mancano ' + settimana().mancano }} entro domenica.
+                }
+              </small>
+            </div>
+          </section>
+        </div>
+      </div>
+    }
+  }
+  @default {
+    <app-scheletro etichetta="Sto caricando la giornata" [righe]="[1, 2, 3, 4]" />
+  }
+}

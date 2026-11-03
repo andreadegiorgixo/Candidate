@@ -1,8 +1,11 @@
 package com.candidate.mapper.CittaMapper;
 
+import org.springframework.stereotype.Component;
+
 import com.candidate.dto.CittaDTO;
 import com.candidate.entity.Citta;
 
+@Component
 public class CittaMapperImpl implements CittaMapper {
 
     @Override
@@ -28,12 +31,17 @@ public class CittaMapperImpl implements CittaMapper {
         }
 
         Citta entity = new Citta();
-        entity.setId(cittaDTO.getId());
-        entity.setNomeCitta(cittaDTO.getNomeCitta());
-        entity.setProvincia(cittaDTO.getProvincia());
-        entity.setRegione(cittaDTO.getRegione());
-        entity.setNazione(cittaDTO.getNazione());
+        updateEntity(cittaDTO, entity);
 
         return entity;
+    }
+
+    // l'id resta escluso: lo gestisce il service
+    @Override
+    public void updateEntity(CittaDTO cittaDTO, Citta citta) {
+        citta.setNomeCitta(cittaDTO.getNomeCitta());
+        citta.setProvincia(cittaDTO.getProvincia());
+        citta.setRegione(cittaDTO.getRegione());
+        citta.setNazione(cittaDTO.getNazione());
     }
 }

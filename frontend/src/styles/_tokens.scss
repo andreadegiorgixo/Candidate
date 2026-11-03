@@ -1,0 +1,41 @@
+:root {
+  --bosco: #092d0b;
+  --bosco-2: #173814;
+  --lime: #cbf949;
+  --avorio: #f9f9ef;
+  --sabbia: #ebebdd;
+  --bordo: #dedfcf;
+  --bianco: #ffffff;
+  --testo-2: #565e50;
+  --verde-testo: #3f6f20;
+  --errore: #b3261e;
+
+  /* Gruppi di stato: fondo e testo */
+  --attesa-f: #ffe3b6;
+  --attesa-t: #8a3b12;
+  --colloqui-f: #c2daff;
+  --colloqui-t: #1f4e9e;
+  --proposta-f: #dcc2ff;
+  --proposta-t: #5b2e9e;
+  --assunzione-f: #cbf949;
+  --assunzione-t: #092d0b;
+  --rifiutata-f: #fbe4e1;
+  --rifiutata-t: #b3261e;
+  --senza-risposta-f: #ebebdd;
+  --senza-risposta-t: #565e50;
+
+  /* Sui fondi scuri */
+  --su-scuro: #e7eedd;
+  --su-scuro-2: #cfdcc1;
+  --linea-spenta: #5f7a56;
+
+  --r-pillola: 999px;
+  --r-campo: 12px;
+  --r-pannello: 20px;
+  --r-banda: 24px;
+
+  --ombra-overlay: 0 8px 28px rgb(9 45 11 / 0.16), 0 1px 3px rgb(9 45 11 / 0.1);
+
+  --larghezza-barra: 236px;
+  --font: 'Mona Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}

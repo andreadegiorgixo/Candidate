@@ -1,0 +1,89 @@
+:host {
+  display: block;
+}
+
+.campi {
+  display: grid;
+  gap: 10px;
+}
+
+.coppia {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+}
+
+.tre {
+  display: grid;
+  grid-template-columns: 90px 1fr 1fr;
+  gap: 0 12px;
+}
+
+.avviso {
+  background: var(--attesa-f);
+  color: var(--attesa-t);
+  border-radius: var(--r-campo);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  display: grid;
+  gap: 4px;
+
+  ul {
+    margin: 0;
+    padding-left: 16px;
+    list-style: disc;
+  }
+}
+
+.nuova-citta {
+  border: 1px solid var(--bordo);
+  border-radius: var(--r-campo);
+  background: var(--avorio);
+  padding: 12px 14px 4px;
+  margin: 0 0 14px;
+
+  legend {
+    padding: 0 6px;
+    font-weight: 650;
+    font-size: 14px;
+  }
+
+  .azioni {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .errore {
+    color: var(--errore);
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+}
+
+.spunta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 14px;
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--bosco);
+  }
+}
+
+@media (max-width: 520px) {
+  .coppia,
+  .tre {
+    grid-template-columns: 1fr;
+  }
+}
+
+.aggiungi-citta {
+  justify-self: start;
+  margin: -6px 0 6px;
+}

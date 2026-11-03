@@ -1,0 +1,126 @@
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$green-palette,
+        theme-type: light,
+      ),
+      typography: (
+        plain-family: 'Mona Sans Variable',
+        brand-family: 'Mona Sans Variable',
+        bold-weight: 700,
+        medium-weight: 600,
+        regular-weight: 400,
+      ),
+      density: -1,
+    )
+  );
+
+  @include mat.theme-overrides(
+    (
+      primary: #092d0b,
+      on-primary: #cbf949,
+      primary-container: #cbf949,
+      on-primary-container: #092d0b,
+      secondary-container: #ebebdd,
+      on-secondary-container: #092d0b,
+      surface: #ffffff,
+      on-surface: #092d0b,
+      on-surface-variant: #565e50,
+      surface-container-lowest: #ffffff,
+      surface-container-low: #f9f9ef,
+      surface-container: #ffffff,
+      surface-container-high: #ffffff,
+      surface-container-highest: #ebebdd,
+      outline: #8b917f,
+      outline-variant: #dedfcf,
+      error: #b3261e,
+      inverse-surface: #092d0b,
+      inverse-on-surface: #f9f9ef,
+      inverse-primary: #cbf949,
+      corner-extra-small: 8px,
+      corner-small: 12px,
+      corner-medium: 12px,
+      corner-large: 20px,
+      corner-extra-large: 20px,
+    )
+  );
+
+  @include mat.form-field-overrides(
+    (
+      outlined-outline-color: #8b917f,
+      outlined-hover-outline-color: #565e50,
+      outlined-focus-outline-color: #3f6f20,
+      outlined-label-text-color: #565e50,
+      outlined-focus-label-text-color: #3f6f20,
+      outlined-container-shape: 12px,
+    )
+  );
+
+  @include mat.dialog-overrides(
+    (
+      container-shape: 20px,
+      container-color: #ffffff,
+    )
+  );
+
+  @include mat.datepicker-overrides(
+    (
+      calendar-date-selected-state-background-color: #092d0b,
+      calendar-date-selected-state-text-color: #cbf949,
+      calendar-date-focus-state-background-color: #ebebdd,
+      calendar-date-today-outline-color: #3f6f20,
+    )
+  );
+
+  @include mat.menu-overrides(
+    (
+      container-shape: 14px,
+    )
+  );
+}
+
+.mat-mdc-dialog-container,
+.mat-mdc-menu-panel,
+.mat-mdc-autocomplete-panel,
+.mat-mdc-select-panel,
+.mat-datepicker-content {
+  box-shadow: var(--ombra-overlay) !important;
+}
+
+/* Il pannello laterale per l'aggiunta rapida */
+/* Il pannello laterale occupa tutta l'altezza: contenuto che scorre, pulsanti sempre in fondo */
+.pannello-laterale {
+  .mat-mdc-dialog-inner-container,
+  .mat-mdc-dialog-surface {
+    height: 100%;
+  }
+
+  .mat-mdc-dialog-container {
+    --mat-dialog-container-shape: 20px 0 0 20px;
+  }
+
+  .mat-mdc-dialog-surface {
+    border-radius: 20px 0 0 20px;
+  }
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-snack-bar-container {
+  --mat-snack-bar-container-shape: 14px;
+}
+
+/* Ricerca globale: una finestra alta e stretta, senza bordi attorno al campo */
+.ricerca-panel .mat-mdc-dialog-surface {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.ricerca-panel .mat-mdc-dialog-container {
+  --mat-dialog-container-shape: 18px;
+}

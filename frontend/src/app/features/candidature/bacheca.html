@@ -1,0 +1,55 @@
+<div class="scorri">
+  <div class="bacheca" cdkDropListGroup>
+    @for (f of fermate; track f.etichetta; let i = $index) {
+      <section class="colonna" [attr.aria-label]="f.etichetta + ': ' + colonne().colonne[i].length + ' candidature'">
+        <h2 class="t">{{ f.etichetta }} <span class="n">{{ colonne().colonne[i].length }}</span></h2>
+        <div
+          class="lista"
+          cdkDropList
+          [cdkDropListData]="i"
+          (cdkDropListDropped)="rilascia($event, i)"
+          [cdkDropListSortingDisabled]="true"
+        >
+          @for (c of colonne().colonne[i]; track c.id) {
+            <article class="scheda" cdkDrag [cdkDragData]="c">
+              <div class="testa">
+                <a [routerLink]="['/candidature', c.id]" class="azienda">{{ c.nomeAzienda }}</a>
+                <button type="button" class="btn-icona piccolo" [matMenuTriggerFor]="menu" [attr.aria-label]="'Azioni per ' + c.nomeAzienda">
+                  <app-icona nome="altro" />
+                </button>
+                <mat-menu #menu="matMenu">
+                  <p class="titolo-menu">Sposta in</p>
+                  @for (altra of fermate; track altra.etichetta; let j = $index) {
+                    @if (j !== i) {
+                      <button mat-menu-item type="button" (click)="sposta(c, altra.stato)">{{ altra.etichetta }}</button>
+                    }
+                  }
+                  <p class="titolo-menu">Segna come</p>
+                  @for (u of uscite; track u) {
+                    <button mat-menu-item type="button" (click)="sposta(c, u)">{{ etichettaStato(u) }}</button>
+                  }
+                </mat-menu>
+              </div>
+              <span class="ruolo">{{ c.posizioneLavorativa }}</span>
+              @if (info[c.statoCandidatura].gruppo === 'proposta') {
+                <span class="tag" [style.background]="'var(--proposta-f)'" [style.color]="'var(--proposta-t)'">{{ etichettaStato(c.statoCandidatura) }}</span>
+              }
+              <small>{{ giorni(c) }}</small>
+              @if (c.prossimaAzioneTesto) {
+                <small class="azione">{{ c.prossimaAzioneTesto }}</small>
+              }
+            </article>
+          } @empty {
+            <p class="nessuna">Nessuna candidatura qui.</p>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</div>
+@if (colonne().fuori > 0) {
+  <p class="fuori tenue">
+    {{ colonne().fuori }} {{ colonne().fuori === 1 ? 'candidatura è uscita dalla linea e non compare' : 'candidature sono uscite dalla linea e non compaiono' }} qui.
+    <a routerLink="/candidature" [queryParams]="{ stato: 'USCITE' }">Vedi le uscite nell’elenco</a>
+  </p>
+}

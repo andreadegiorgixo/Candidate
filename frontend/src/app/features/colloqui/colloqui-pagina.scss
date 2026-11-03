@@ -1,0 +1,326 @@
+.schede {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--sabbia);
+  border-radius: var(--r-pillola);
+  padding: 3px;
+  margin-bottom: 22px;
+  max-width: 100%;
+  overflow-x: auto;
+
+  button {
+    border: 0;
+    background: transparent;
+    border-radius: var(--r-pillola);
+    padding: 8px 16px;
+    font-weight: 600;
+    color: var(--testo-2);
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    &[aria-selected='true'] {
+      background: var(--bosco);
+      color: var(--lime);
+    }
+
+    &[aria-selected='false']:hover {
+      color: var(--bosco);
+    }
+  }
+
+  .n {
+    font-size: 12.5px;
+    background: var(--bianco);
+    color: var(--testo-2);
+    border-radius: var(--r-pillola);
+    padding: 0 8px;
+    font-weight: 650;
+
+    &.avviso {
+      background: var(--attesa-f);
+      color: var(--attesa-t);
+    }
+  }
+
+  [aria-selected='true'] .n {
+    background: var(--bosco-2);
+    color: var(--su-scuro-2);
+  }
+}
+
+.promemoria {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: var(--attesa-f);
+  color: var(--attesa-t);
+  border-radius: var(--r-campo);
+  padding: 10px 16px;
+  margin-bottom: 18px;
+  font-weight: 500;
+
+  .btn:not(.primario) {
+    background: rgb(255 255 255 / 0.6);
+  }
+
+  &.interno {
+    margin: 12px 0 0;
+  }
+}
+
+.elenco {
+  display: grid;
+  gap: 14px;
+}
+
+.scheda {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 18px 22px;
+  align-items: start;
+
+  &.evidenziada {
+    border-color: var(--bosco);
+    box-shadow: 0 0 0 2px var(--bosco);
+  }
+}
+
+.data {
+  text-align: center;
+  background: var(--avorio);
+  border-radius: 14px;
+  padding: 7px 0;
+  font-size: 12.5px;
+  color: var(--testo-2);
+
+  b {
+    display: block;
+    font-size: 22px;
+    line-height: 1.1;
+    color: var(--bosco);
+  }
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 700;
+
+  a {
+    color: var(--bosco);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+}
+
+.sotto {
+  color: var(--testo-2);
+  margin: 2px 0 8px;
+
+  strong {
+    color: var(--bosco);
+  }
+}
+
+.dettagli {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 10px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    overflow-wrap: anywhere;
+  }
+
+  app-icona {
+    color: var(--testo-2);
+  }
+}
+
+.checklist {
+  border: 0;
+  padding: 12px 0 0;
+  margin: 0;
+  border-top: 1px solid var(--sabbia);
+  display: grid;
+  gap: 6px;
+
+  legend {
+    font-weight: 650;
+    font-size: 14px;
+    padding: 0;
+    float: left;
+    width: 100%;
+    margin-bottom: 6px;
+  }
+
+  label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    clear: both;
+  }
+
+  input {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--bosco);
+    flex: none;
+  }
+
+  .fatta {
+    color: var(--testo-2);
+    text-decoration: line-through;
+    text-decoration-color: #8b917f;
+  }
+}
+
+.az {
+  display: grid;
+  gap: 6px;
+  justify-items: stretch;
+}
+
+.voto-riga {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.pallini {
+  display: inline-flex;
+  gap: 5px;
+
+  i {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--sabbia);
+
+    &.on {
+      background: var(--bosco);
+    }
+  }
+}
+
+h3 {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--testo-2);
+  margin: 10px 0 3px;
+}
+
+.domande-lista {
+  display: grid;
+  gap: 3px;
+  padding-left: 16px;
+  list-style: disc;
+}
+
+.filtri-domande {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+
+  .cerca {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    margin-top: 0;
+    flex: 1 1 260px;
+    max-width: 420px;
+
+    app-icona {
+      position: absolute;
+      left: 13px;
+      color: var(--testo-2);
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      height: 40px;
+      border: 1px solid #8b917f;
+      border-radius: var(--r-campo);
+      padding: 0 12px 0 38px;
+      background: var(--bianco);
+
+      &:focus-visible {
+        outline: 2px solid var(--verde-testo);
+        outline-offset: 1px;
+        border-color: var(--verde-testo);
+      }
+    }
+  }
+
+  .sel {
+    --mat-form-field-container-height: 40px;
+    --mat-form-field-container-vertical-padding: 8px;
+    width: 210px;
+  }
+
+  .conta {
+    align-self: center;
+    margin-left: auto;
+    font-size: 14px;
+  }
+}
+
+.archivio {
+  li {
+    padding: 15px 22px;
+    border-bottom: 1px solid var(--sabbia);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .testo-domanda {
+    font-size: 16.5px;
+    font-weight: 600;
+  }
+
+  .meta {
+    font-size: 13.5px;
+    margin-top: 2px;
+  }
+
+  .ricorre {
+    color: var(--bosco);
+  }
+}
+
+@media (max-width: 1050px) {
+  .scheda {
+    grid-template-columns: 52px minmax(0, 1fr);
+    padding: 16px;
+  }
+
+  .az {
+    grid-column: 1 / -1;
+    grid-auto-flow: column;
+    justify-content: start;
+  }
+
+  .filtri-domande .conta {
+    margin-left: 0;
+    width: 100%;
+  }
+}

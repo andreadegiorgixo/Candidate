@@ -1,0 +1,164 @@
+@let f = form();
+<div class="campi" [formGroup]="f">
+  @if (duplicati().length) {
+    <div class="avviso" role="status">
+      <strong>Hai già scritto a questa azienda.</strong>
+      <ul>
+        @for (d of duplicati(); track d.id) {
+          <li>{{ d.testo }}</li>
+        }
+      </ul>
+      <span>Puoi salvare lo stesso, per esempio se è un altro ruolo.</span>
+    </div>
+  }
+
+  <mat-form-field appearance="outline">
+    <mat-label>Azienda</mat-label>
+    <input matInput formControlName="nomeAzienda" autocomplete="off" required />
+    @if (f.controls.nomeAzienda.invalid) {
+      <mat-error>Indica il nome dell’azienda.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Ruolo</mat-label>
+    <input matInput formControlName="posizioneLavorativa" autocomplete="off" required />
+    @if (f.controls.posizioneLavorativa.invalid) {
+      <mat-error>Indica il ruolo per cui ti sei candidata o candidato.</mat-error>
+    }
+  </mat-form-field>
+
+  <div class="coppia">
+    <mat-form-field appearance="outline">
+      <mat-label>Modalità</mat-label>
+      <mat-select formControlName="modalita">
+        @for (m of modalita; track m) {
+          <mat-option [value]="m">{{ etichettaModalita[m] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Data di invio</mat-label>
+      <input matInput [matDatepicker]="dp" formControlName="dataCandidatura" required />
+      <mat-datepicker-toggle matIconSuffix [for]="dp" />
+      <mat-datepicker #dp />
+      @if (f.controls.dataCandidatura.invalid) {
+        <mat-error>Indica quando hai inviato la candidatura.</mat-error>
+      }
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Città</mat-label>
+    <input matInput formControlName="citta" [matAutocomplete]="ac" autocomplete="off" required />
+    <mat-autocomplete #ac="matAutocomplete" [displayWith]="mostraCitta" (optionSelected)="sceltaCitta()">
+      @for (c of cittaFiltrate(); track c.id) {
+        <mat-option [value]="c">{{ c.nomeCitta }} ({{ c.provincia }})</mat-option>
+      }
+    </mat-autocomplete>
+    <mat-hint>Per il lavoro da remoto indica la sede dell’azienda.</mat-hint>
+    @if (f.controls.citta.invalid && f.controls.citta.touched) {
+      <mat-error>Scegli una città dall’elenco o aggiungila.</mat-error>
+    }
+  </mat-form-field>
+
+  @if (puoCreare() && !creaCitta()) {
+    <button type="button" class="btn testo piccolo aggiungi-citta" (click)="apriNuovaCitta()">
+      Aggiungi «{{ testoDigitato() }}» come nuova città
+    </button>
+  }
+
+  @if (creaCitta(); as nuova) {
+    <fieldset class="nuova-citta" [formGroup]="formCitta">
+      <legend>Nuova città: {{ nuova.nome }}</legend>
+      <div class="tre">
+        <mat-form-field appearance="outline">
+          <mat-label>Provincia</mat-label>
+          <input matInput formControlName="provincia" maxlength="2" placeholder="MI" />
+          @if (formCitta.controls.provincia.invalid) {
+            <mat-error>Due lettere, per esempio MI.</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Regione</mat-label>
+          <input matInput formControlName="regione" />
+          @if (formCitta.controls.regione.invalid) {
+            <mat-error>Indica la regione.</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Nazione</mat-label>
+          <input matInput formControlName="nazione" />
+        </mat-form-field>
+      </div>
+      @if (erroreCitta()) {
+        <p class="errore" role="alert">{{ erroreCitta() }}</p>
+      }
+      <div class="azioni">
+        <button type="button" class="btn piccolo primario" (click)="salvaCitta()" [disabled]="salvandoCitta()">Salva città</button>
+        <button type="button" class="btn piccolo" (click)="annullaCitta()">Annulla</button>
+      </div>
+    </fieldset>
+  }
+
+  @if (altri()) {
+    @if (conStato()) {
+      <mat-form-field appearance="outline">
+        <mat-label>Stato</mat-label>
+        <mat-select formControlName="statoCandidatura">
+          @for (s of stati; track s) {
+            <mat-option [value]="s">{{ etichettaStato(s) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
+    <label class="spunta">
+      <input type="checkbox" formControlName="spontanea" />
+      <span>Candidatura spontanea, senza annuncio</span>
+    </label>
+
+    <div class="coppia">
+      <mat-form-field appearance="outline">
+        <mat-label>Dove l’hai trovata</mat-label>
+        <mat-select formControlName="fonte">
+          @for (o of fonti; track o) {
+            <mat-option [value]="o">{{ etichettaFonte[o] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Versione del CV</mat-label>
+        <mat-select formControlName="idCv">
+          <mat-option [value]="null">Nessuna</mat-option>
+          @for (c of cv.elementi(); track c.id) {
+            <mat-option [value]="c.id">{{ c.nome }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ etichettaAnnuncio() }}</mat-label>
+      <textarea matInput formControlName="jobOffert" rows="3"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Note</mat-label>
+      <textarea matInput formControlName="note" rows="3"></textarea>
+    </mat-form-field>
+
+    <div class="coppia">
+      <mat-form-field appearance="outline">
+        <mat-label>Prossima azione</mat-label>
+        <input matInput formControlName="prossimaAzioneTesto" placeholder="Per esempio: mandare il portfolio" autocomplete="off" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Entro il</mat-label>
+        <input matInput [matDatepicker]="dpa" formControlName="prossimaAzioneData" />
+        <mat-datepicker-toggle matIconSuffix [for]="dpa" />
+        <mat-datepicker #dpa />
+      </mat-form-field>
+    </div>
+  }
+</div>

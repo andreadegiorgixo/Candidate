@@ -1,0 +1,45 @@
+@if (variante() === 'mini') {
+  <span class="mini" role="img" [attr.aria-label]="descrizione()">
+    @for (el of elementi(); track $index) {
+      @if (el.tipo === 'punto') {
+        <i [class]="el.classi"></i>
+      } @else {
+        <u [class]="el.classi"></u>
+      }
+    }
+  </span>
+} @else {
+  <div class="cronologia">
+    <ol class="fermate" [attr.aria-label]="descrizione()">
+      @for (passo of p().passi; track passo.indice) {
+        <li [class]="passo.stato">
+          <i class="pt"></i>
+          <strong>{{ passo.etichetta }}</strong>
+          <span>
+            @if (passo.stato === 'futuro') {
+              Non ancora
+            } @else {
+              {{ data(passo.data) }}
+            }
+          </span>
+        </li>
+      }
+    </ol>
+    @if (testoEsito(); as t) {
+      <p class="esito" [class]="p().esito">{{ t }}</p>
+    }
+    @if (eventi().length) {
+      <ol class="eventi" aria-label="Cambi di stato">
+        @for (e of eventi(); track $index) {
+          <li>
+            <span class="d">{{ e.data }}</span>
+            <strong>{{ e.etichetta }}</strong>
+            @if (e.nota) {
+              <span class="nota">{{ e.nota }}</span>
+            }
+          </li>
+        }
+      </ol>
+    }
+  </div>
+}

@@ -1,0 +1,113 @@
+<a routerLink="/aziende" class="indietro"><app-icona nome="ordina-su" class="ruota" /> Tutte le aziende</a>
+
+@if (delle().length > 0) {
+  <header class="testata">
+    <h1>{{ nome() }}</h1>
+    <p class="tenue">{{ delle().length }} {{ delle().length === 1 ? 'candidatura' : 'candidature' }}</p>
+  </header>
+
+  @if (daAspettare(); as p) {
+    <div class="attenzione" role="status">
+      Hai deciso di non ricontattare {{ nome() }} prima del <strong>{{ formatoCompleto(p) }}</strong>.
+    </div>
+  }
+
+  <div class="colonne">
+    <div class="principale">
+      <section aria-labelledby="t-cand">
+        <h2 class="t" id="t-cand">Candidature</h2>
+        <ul class="pann">
+          @for (c of ordinate(); track c.id) {
+            <li class="riga">
+              <div>
+                <a [routerLink]="['/candidature', c.id]" class="titolo-riga">{{ c.posizioneLavorativa }}</a>
+                <small>Inviata il {{ formatoCompleto(c.dataCandidatura) }}</small>
+                <app-percorso [stato]="c.statoCandidatura" [storico]="storico.perId().get(c.id)" [dataCandidatura]="c.dataCandidatura" class="mini-riga" />
+                <app-stato-tag [stato]="c.statoCandidatura" />
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section aria-labelledby="t-crono">
+        <h2 class="t" id="t-crono">Cronologia</h2>
+        <ol class="pann cronologia">
+          @for (e of cronologia(); track $index) {
+            <li>
+              <span class="d">{{ formatoCompleto(e.data) }}</span>
+              <span>{{ e.testo }}</span>
+            </li>
+          } @empty {
+            <li class="tenue">Nessun evento registrato.</li>
+          }
+        </ol>
+      </section>
+    </div>
+
+    <div class="laterale">
+      <section aria-labelledby="t-promemoria">
+        <h2 class="t" id="t-promemoria">Da non ricontattare prima del</h2>
+        <div class="pann padd">
+          <mat-form-field appearance="outline">
+            <mat-label>Data</mat-label>
+            <input matInput [matDatepicker]="dp" [formControl]="data" />
+            <mat-datepicker-toggle matIconSuffix [for]="dp" />
+            <mat-datepicker #dp />
+          </mat-form-field>
+          <p class="tenue aiuto">Per esempio dopo un rifiuto o una richiesta di attendere.</p>
+          <div class="azioni">
+            <button type="button" class="btn primario piccolo" (click)="salvaPromemoria()" [disabled]="salvando() || !promemoriaPronto()">Salva promemoria</button>
+            @if (promemoria()) {
+              <button type="button" class="btn piccolo" (click)="togliPromemoria()" [disabled]="salvando()">Togli promemoria</button>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="t-contatti">
+        <h2 class="t" id="t-contatti">Contatti</h2>
+        <div class="pann">
+          @for (p of contatti(); track p.id) {
+            <div class="riga">
+              <div>
+                <strong>{{ p.nome }}</strong>
+                <small>{{ p.ruolo }}</small>
+                @if (p.email) {
+                  <small><a [href]="'mailto:' + p.email">{{ p.email }}</a></small>
+                }
+                @if (p.linkedin) {
+                  <small><a [href]="p.linkedin" target="_blank" rel="noopener noreferrer">LinkedIn</a></small>
+                }
+                @if (p.note) {
+                  <small>{{ p.note }}</small>
+                }
+              </div>
+              <div class="az">
+                <button type="button" class="btn-icona" (click)="modificaContatto(p)" [attr.aria-label]="'Modifica ' + p.nome"><app-icona nome="modifica" /></button>
+                <button type="button" class="btn-icona" (click)="togliContatto(p)" [attr.aria-label]="'Togli ' + p.nome"><app-icona nome="elimina" /></button>
+              </div>
+            </div>
+          } @empty {
+            <p class="vuoto-interno">Non hai ancora salvato nessun contatto per {{ nome() }}.</p>
+          }
+          <div class="piede"><button type="button" class="btn piccolo" (click)="nuovoContatto()"><app-icona nome="piu" /> Aggiungi contatto</button></div>
+        </div>
+      </section>
+    </div>
+  </div>
+} @else {
+  @switch (candidature.stato()) {
+    @case ('errore') {
+      <app-errore-caricamento [errore]="candidature.errore()" (riprova)="candidature.carica(true)" />
+    }
+    @case ('pronto') {
+      <app-stato-vuoto titolo="Non ho trovato questa azienda" testo="Non ci sono candidature con questo nome. Torna all’elenco per cercarla.">
+        <a routerLink="/aziende" class="btn primario">Vai alle aziende</a>
+      </app-stato-vuoto>
+    }
+    @default {
+      <app-scheletro etichetta="Sto caricando l’azienda" [righe]="[1, 2, 3]" />
+    }
+  }
+}

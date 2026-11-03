@@ -1,5 +1,6 @@
 package com.candidate.config;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -60,6 +61,7 @@ public class SecurityConfig {
 				HttpMethod.DELETE.name(),
 				HttpMethod.OPTIONS.name()));
 		configuration.setAllowedHeaders(List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE));
+		configuration.setMaxAge(Duration.ofHours(1));
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);

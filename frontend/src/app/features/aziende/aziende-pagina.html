@@ -1,0 +1,52 @@
+<app-testata titolo="Aziende" sottotitolo="Per ricordarti se ci sei già passato." />
+
+@switch (candidature.stato()) {
+  @case ('errore') {
+    <app-errore-caricamento [errore]="candidature.errore()" (riprova)="ricarica()" />
+  }
+  @case ('pronto') {
+    @if (aziende().length === 0) {
+      <app-stato-vuoto titolo="Non hai ancora aziende" testo="Compaiono qui man mano che aggiungi candidature. Cominciamo dalla prima.">
+        <a routerLink="/candidature" class="btn primario">Vai alle candidature</a>
+      </app-stato-vuoto>
+    } @else {
+      <div class="cerca">
+        <app-icona nome="cerca" />
+        <input type="search" placeholder="Cerca un’azienda" aria-label="Cerca un’azienda" [value]="ricerca()" (input)="ricerca.set(testoDa($event))" />
+      </div>
+      @if (filtrate().length === 0) {
+        <app-stato-vuoto titolo="Nessuna azienda con questo nome" testo="Controlla come l’hai scritta oppure togli parte del testo." />
+      } @else {
+        <div class="pann tabella">
+          <table>
+            <caption class="solo-lettori">Aziende, {{ filtrate().length }} risultati</caption>
+            <thead>
+              <tr>
+                <th scope="col">Azienda</th>
+                <th scope="col" class="num">Candidature</th>
+                <th scope="col">Ultimo stato</th>
+                <th scope="col">Ultimo contatto</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of filtrate(); track a.chiave) {
+                <tr>
+                  <th scope="row">
+                    <a [routerLink]="['/aziende', a.chiave]">{{ a.nome }}</a>
+                    <span class="tenue ruoli">{{ a.candidature[0].posizioneLavorativa }}{{ a.candidature.length > 1 ? ' e altre' : '' }}</span>
+                  </th>
+                  <td class="num cifre" data-etichetta="Candidature">{{ a.candidature.length }}</td>
+                  <td data-etichetta="Ultimo stato"><app-stato-tag [stato]="a.ultimoStato" /></td>
+                  <td data-etichetta="Ultimo contatto">{{ formatoCompleto(a.ultimoContatto) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  }
+  @default {
+    <app-scheletro etichetta="Sto caricando le aziende" [righe]="[1, 2, 3, 4, 5]" />
+  }
+}

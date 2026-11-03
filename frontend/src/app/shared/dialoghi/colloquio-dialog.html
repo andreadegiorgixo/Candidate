@@ -1,0 +1,106 @@
+<h2 mat-dialog-title>
+  @if (soloResoconto) {
+    Come è andato il colloquio
+  } @else if (dati.colloquio) {
+    Modifica colloquio
+  } @else {
+    Aggiungi colloquio
+  }
+</h2>
+<form [formGroup]="form" (ngSubmit)="salva()" novalidate>
+  <mat-dialog-content>
+    @if (candidaturaFissa(); as cf) {
+      <p class="riepilogo">
+        <strong>{{ cf.nomeAzienda }}</strong>, {{ cf.posizioneLavorativa }}
+      </p>
+    } @else {
+      <mat-form-field appearance="outline">
+        <mat-label>Candidatura</mat-label>
+        <mat-select formControlName="idCandidatura" required>
+          @for (x of candidatureSelezionabili(); track x.id) {
+            <mat-option [value]="x.id">{{ x.nomeAzienda }}, {{ x.posizioneLavorativa }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.idCandidatura.invalid) {
+          <mat-error>Scegli a quale candidatura si riferisce.</mat-error>
+        }
+      </mat-form-field>
+    }
+
+    @if (!soloResoconto) {
+      <div class="tre">
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select formControlName="tipo">
+            @for (t of tipi; track t) {
+              <mat-option [value]="t">{{ etichetteTipo[t] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Data</mat-label>
+          <input matInput [matDatepicker]="dp" formControlName="data" required />
+          <mat-datepicker-toggle matIconSuffix [for]="dp" />
+          <mat-datepicker #dp />
+          @if (form.controls.data.invalid) {
+            <mat-error>Indica il giorno.</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Ora</mat-label>
+          <input matInput type="time" formControlName="ora" required />
+          @if (form.controls.ora.invalid) {
+            <mat-error>Indica l’ora.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="outline">
+        <mat-label>Link o luogo</mat-label>
+        <input matInput formControlName="luogoOLink" autocomplete="off" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Persone che incontri</mat-label>
+        <input matInput formControlName="persone" autocomplete="off" />
+      </mat-form-field>
+
+      <fieldset class="checklist">
+        <legend>Checklist di preparazione</legend>
+        @for (voce of checklist.controls; track voce; let i = $index) {
+          <div class="voce" [formGroup]="voce">
+            <input type="checkbox" formControlName="fatto" [attr.aria-label]="'Fatto: ' + voce.controls.testo.value" />
+            <input class="testo" formControlName="testo" [attr.aria-label]="'Voce ' + (i + 1)" />
+            <button type="button" class="btn-icona" (click)="togliVoce(i)" [attr.aria-label]="'Togli la voce ' + (i + 1)"><app-icona nome="chiudi" /></button>
+          </div>
+        }
+        <button type="button" class="btn piccolo" (click)="aggiungiVoce()"><app-icona nome="piu" /> Aggiungi voce</button>
+      </fieldset>
+    }
+
+    @if (conResoconto()) {
+      <fieldset class="resoconto">
+        <legend>Resoconto</legend>
+        <div class="voto" role="radiogroup" aria-label="Come è andata, da 1 a 5">
+          <span class="etichetta">Come è andata</span>
+          @for (n of voti; track n) {
+            <button type="button" role="radio" class="n" [class.on]="form.controls.voto.value === n" [attr.aria-checked]="form.controls.voto.value === n" (click)="scegliVoto(n)">{{ n }}</button>
+          }
+          <span class="scala">1 male, 5 benissimo</span>
+        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Domande ricevute, una per riga</mat-label>
+          <textarea matInput formControlName="domande" rows="4"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Cosa migliorare</mat-label>
+          <textarea matInput formControlName="daMigliorare" rows="3"></textarea>
+        </mat-form-field>
+      </fieldset>
+    }
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button type="button" class="btn" mat-dialog-close>Annulla</button>
+    <button type="submit" class="btn primario" [disabled]="salvataggio()">
+      {{ soloResoconto ? 'Salva resoconto' : 'Salva colloquio' }}
+    </button>
+  </mat-dialog-actions>
+</form>

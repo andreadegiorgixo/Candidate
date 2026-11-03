@@ -1,0 +1,63 @@
+<app-testata titolo="Offerte" sottotitolo="Le proposte aperte, una accanto all’altra.">
+  <button type="button" class="btn primario" (click)="aggiungi()">Aggiungi proposta</button>
+</app-testata>
+
+@switch (stato()) {
+  @case ('errore') {
+    <app-errore-caricamento [errore]="errore()" (riprova)="ricarica()" />
+  }
+  @case ('pronto') {
+    @if (aperte().length === 0) {
+      <app-stato-vuoto titolo="Qui confronterai le proposte quando ne riceverai una." testo="Quando una candidatura arriva a una proposta, aggiungila: vedrai RAL, ferie, benefit e scadenze a colpo d’occhio.">
+        <button type="button" class="btn primario" (click)="aggiungi()">Aggiungi una proposta</button>
+        <a routerLink="/candidature" [queryParams]="{ fermata: 4 }" class="btn">Vedi le candidature in proposta</a>
+      </app-stato-vuoto>
+    } @else {
+      <div class="scorri" role="region" aria-label="Confronto delle proposte" tabindex="0">
+        <table class="pann confronto" [style.--colonne]="aperte().length">
+          <caption class="solo-lettori">Confronto di {{ aperte().length }} proposte aperte. Il valore migliore di ogni riga è segnato.</caption>
+          <thead>
+            <tr>
+              <td></td>
+              @for (x of aperte(); track x.o.id) {
+                <th scope="col">
+                  <a [routerLink]="['/candidature', x.c!.id]" class="azienda">{{ x.c!.nomeAzienda }}</a>
+                  <span class="ruolo">{{ x.c!.posizioneLavorativa }}</span>
+                  <span class="az">
+                    <button type="button" class="btn-icona" (click)="modifica(x.o)" [attr.aria-label]="'Modifica la proposta di ' + x.c!.nomeAzienda"><app-icona nome="modifica" /></button>
+                    <button type="button" class="btn-icona" (click)="elimina(x.o)" [attr.aria-label]="'Elimina la proposta di ' + x.c!.nomeAzienda"><app-icona nome="elimina" /></button>
+                  </span>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of righe; track r.chiave) {
+              <tr>
+                <th scope="row">{{ r.etichetta }}</th>
+                @for (x of aperte(); track x.o.id) {
+                  <td [attr.data-etichetta]="x.c!.nomeAzienda" [class.testo-lungo]="r.chiave === 'benefit' || r.chiave === 'note'">
+                    @if (r.testo(x.o); as t) {
+                      @if (eMigliore(r.chiave, x.o.id)) {
+                        <span class="migliore">{{ t }}</span>
+                        <span class="solo-lettori">, il valore migliore di questa riga</span>
+                      } @else {
+                        <span>{{ t }}</span>
+                      }
+                    } @else {
+                      <span class="tenue">Non indicato</span>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="legenda tenue">Il fondo evidenziato segna il valore migliore di ogni riga. Non è un consiglio: la scelta dipende da cosa conta per te.</p>
+    }
+  }
+  @default {
+    <app-scheletro etichetta="Sto caricando le proposte" [righe]="[1, 2, 3]" />
+  }
+}

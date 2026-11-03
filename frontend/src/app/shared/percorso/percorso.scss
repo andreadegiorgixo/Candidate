@@ -1,0 +1,213 @@
+:host {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+:host(.esteso) {
+  display: block;
+}
+
+/* Versione piccola, nelle righe */
+.mini {
+  display: inline-flex;
+  align-items: center;
+  min-width: 134px;
+  height: 14px;
+
+  i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--bosco);
+
+    &.off {
+      background: var(--bianco);
+      border: 2px solid #aeb5a3;
+    }
+
+    &.corrente {
+      width: 12px;
+      height: 12px;
+      box-shadow: 0 0 0 2px var(--bianco), 0 0 0 3.5px var(--bosco);
+    }
+  }
+
+  u {
+    width: 16px;
+    height: 2px;
+    flex: none;
+    background: var(--bosco);
+
+    &.off {
+      background: #d2d5c4;
+    }
+
+    /* Rifiuto: la linea si interrompe con un taglio. */
+    &.taglio {
+      width: 8px;
+      background: var(--errore);
+      position: relative;
+      margin-right: 5px;
+
+      &::after {
+        content: '';
+        position: absolute;
+        right: -3px;
+        top: -5px;
+        width: 2px;
+        height: 12px;
+        background: var(--errore);
+        border-radius: 1px;
+      }
+    }
+
+    /* Senza risposta: la linea sfuma nel grigio. */
+    &.sfuma {
+      width: 56px;
+      background: linear-gradient(90deg, var(--bosco), rgb(9 45 11 / 0));
+    }
+  }
+}
+
+/* Versione datata, nel dettaglio */
+.cronologia {
+  display: grid;
+  gap: 18px;
+}
+
+.fermate {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    right: 16.6%;
+    top: 7px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--sabbia);
+  }
+
+  li {
+    position: relative;
+    display: grid;
+    gap: 2px;
+    justify-items: start;
+    align-content: start;
+    font-size: 13.5px;
+    color: var(--testo-2);
+  }
+
+  strong {
+    font-size: 14.5px;
+    color: var(--bosco);
+    font-weight: 650;
+  }
+
+  .pt {
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: var(--bianco);
+    border: 3px solid #8b917f;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .raggiunto .pt,
+  .corrente .pt {
+    background: var(--bosco);
+    border-color: var(--bosco);
+  }
+
+  .corrente .pt {
+    box-shadow: 0 0 0 3px var(--bianco), 0 0 0 5px var(--bosco);
+  }
+
+  .interrotto .pt {
+    background: var(--errore);
+    border-color: var(--errore);
+  }
+
+  /* Segmento pieno fino alla fermata raggiunta */
+  .raggiunto::after,
+  .corrente::after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 7px;
+    height: 3px;
+    background: var(--bosco);
+    width: 100%;
+  }
+
+  .corrente::after,
+  .interrotto::after {
+    display: none;
+  }
+}
+
+.esito {
+  font-weight: 650;
+  font-size: 14px;
+  padding: 3px 11px;
+  border-radius: 8px;
+  justify-self: start;
+
+  &.rifiutata,
+  &.ritirata,
+  &.proposta-rifiutata {
+    background: var(--rifiutata-f);
+    color: var(--rifiutata-t);
+  }
+
+  &.senza-risposta {
+    background: var(--senza-risposta-f);
+    color: var(--senza-risposta-t);
+  }
+
+  &.conclusa {
+    background: var(--assunzione-f);
+    color: var(--assunzione-t);
+  }
+}
+
+.eventi {
+  display: grid;
+  border-top: 1px solid var(--sabbia);
+
+  li {
+    display: grid;
+    grid-template-columns: 150px 190px minmax(0, 1fr);
+    gap: 4px 14px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--sabbia);
+    font-size: 14px;
+  }
+
+  .d,
+  .nota {
+    color: var(--testo-2);
+  }
+}
+
+@media (max-width: 700px) {
+  .fermate {
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 18px;
+
+    &::before,
+    .raggiunto::after {
+      display: none;
+    }
+  }
+
+  .eventi li {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

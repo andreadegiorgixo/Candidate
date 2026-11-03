@@ -1,0 +1,169 @@
+<app-testata titolo="Candidature" [sottotitolo]="store.stato() === 'pronto' ? riepilogo() : ''">
+  <button type="button" class="btn" (click)="esporta()" [disabled]="ordinate().length === 0">
+    <app-icona nome="esporta" /> Esporta CSV
+  </button>
+  <button type="button" class="btn primario" (click)="aggiungi()">Aggiungi candidatura</button>
+</app-testata>
+
+@switch (store.stato()) {
+  @case ('errore') {
+    <app-errore-caricamento [errore]="store.errore()" (riprova)="store.carica(true)" />
+  }
+  @case ('pronto') {
+    @if (store.elementi().length === 0) {
+      <app-stato-vuoto titolo="Non hai ancora candidature" testo="Aggiungi la prima: bastano azienda, ruolo, città e data di invio.">
+        <button type="button" class="btn primario" (click)="aggiungi()">Aggiungi candidatura</button>
+      </app-stato-vuoto>
+    } @else {
+      <div class="barra">
+        <div class="filtri" role="search" aria-label="Filtri">
+          <div class="cerca">
+            <app-icona nome="cerca" />
+            <input
+              type="search"
+              placeholder="Cerca azienda, ruolo o città"
+              aria-label="Cerca azienda, ruolo o città"
+              [value]="ricerca()"
+              (input)="scrivi(testoDa($event))"
+            />
+          </div>
+          <mat-form-field appearance="outline" class="sel">
+            <mat-label>Stato</mat-label>
+            <mat-select [value]="filtri().stato" (selectionChange)="aggiorna({ stato: $event.value })">
+              <mat-option value="">Tutti</mat-option>
+              <mat-option value="IN_CORSO">Solo in corso</mat-option>
+              <mat-option value="USCITE">Solo uscite</mat-option>
+              @for (s of stati; track s) {
+                <mat-option [value]="s">{{ etichettaStato(s) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="sel">
+            <mat-label>Modalità</mat-label>
+            <mat-select [value]="filtri().modalita" (selectionChange)="aggiorna({ modalita: $event.value })">
+              <mat-option value="">Tutte</mat-option>
+              @for (m of modalita; track m) {
+                <mat-option [value]="m">{{ etichettaModalita[m] }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="sel">
+            <mat-label>Città</mat-label>
+            <mat-select [value]="filtri().citta ?? ''" (selectionChange)="aggiorna({ citta: $event.value === '' ? null : $event.value })">
+              <mat-option value="">Tutte</mat-option>
+              @for (c of cittaUsate(); track c.id) {
+                <mat-option [value]="c.id">{{ c.nome }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="sel">
+            <mat-label>Fonte</mat-label>
+            <mat-select [value]="filtri().fonte" (selectionChange)="aggiorna({ fonte: $event.value })">
+              <mat-option value="">Tutte</mat-option>
+              @for (o of fonti; track o) {
+                <mat-option [value]="o">{{ etichettaFonte[o] }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="sel">
+            <mat-label>Tipo</mat-label>
+            <mat-select [value]="filtri().tipo" (selectionChange)="aggiorna({ tipo: $event.value })">
+              <mat-option value="">Tutte</mat-option>
+              <mat-option value="annuncio">Con annuncio</mat-option>
+              <mat-option value="spontanea">Spontanee</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="vista" role="group" aria-label="Tipo di vista">
+          <button type="button" [attr.aria-pressed]="vista() === 'elenco'" (click)="aggiorna({ vista: 'elenco' })">
+            <app-icona nome="elenco" /> Elenco
+          </button>
+          <button type="button" [attr.aria-pressed]="vista() === 'bacheca'" (click)="aggiorna({ vista: 'bacheca' })">
+            <app-icona nome="bacheca" /> Bacheca
+          </button>
+        </div>
+      </div>
+
+      @if (filtri().fermata !== null || nFiltri() > 0) {
+        <div class="attivi">
+          @if (filtri().fermata !== null) {
+            <button type="button" class="chip" (click)="aggiorna({ fermata: null })" [attr.aria-label]="'Togli il filtro fermata ' + fermate[filtri().fermata!].etichetta">
+              Fermata: {{ fermate[filtri().fermata!].etichetta }} <app-icona nome="chiudi" />
+            </button>
+          }
+          <button type="button" class="btn testo piccolo" (click)="azzera()">Azzera i filtri</button>
+        </div>
+      }
+
+      @if (ordinate().length === 0) {
+        <app-stato-vuoto titolo="Nessuna candidatura corrisponde ai filtri" testo="Prova a togliere un filtro o a cercare con meno parole.">
+          <button type="button" class="btn primario" (click)="azzera()">Azzera i filtri</button>
+        </app-stato-vuoto>
+      } @else if (vista() === 'bacheca') {
+        <app-bacheca [candidature]="ordinate()" />
+      } @else {
+        <div class="ordina-mobile">
+          <label for="ordina">Ordina per</label>
+          <select id="ordina" [value]="ordine().colonna" (change)="ordinaSelect(testoDa($event))">
+            @for (c of colonne; track c.id) {
+              <option [value]="c.id" [selected]="c.id === ordine().colonna">{{ c.titolo }}</option>
+            }
+          </select>
+          <button type="button" class="btn piccolo" (click)="direzioneSelect()">
+            <app-icona [nome]="ordine().direzione === 'asc' ? 'ordina-su' : 'ordina-giu'" />
+            {{ ordine().direzione === 'asc' ? 'Dal più basso' : 'Dal più alto' }}
+          </button>
+        </div>
+        <div class="pann tabella">
+          <table>
+            <caption class="solo-lettori">Elenco delle candidature, {{ ordinate().length }} risultati</caption>
+            <thead>
+              <tr>
+                @for (c of colonne; track c.id) {
+                  <th scope="col" [attr.aria-sort]="ariaSort(c.id)" [class]="'col-' + c.id">
+                    <button type="button" (click)="ordinaPer(c.id)">
+                      {{ c.titolo }}
+                      @if (ordine().colonna === c.id) {
+                        <app-icona [nome]="ordine().direzione === 'asc' ? 'ordina-su' : 'ordina-giu'" />
+                      }
+                    </button>
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of ordinate(); track c.id) {
+                <tr (click)="apri(c, $event)">
+                  <th scope="row" class="col-azienda">
+                    <a [routerLink]="['/candidature', c.id]" class="azienda">{{ c.nomeAzienda }}</a>
+                    <span class="ruolo">{{ c.posizioneLavorativa }}</span>
+                  </th>
+                  <td class="col-stato">
+                    <app-percorso [stato]="c.statoCandidatura" [storico]="storico.perId().get(c.id)" [dataCandidatura]="c.dataCandidatura" />
+                    <app-stato-tag [stato]="c.statoCandidatura" />
+                  </td>
+                  <td class="col-modalita" data-etichetta="Modalità">{{ etichettaModalita[c.modalita] }}</td>
+                  <td class="col-citta" data-etichetta="Città">{{ c.citta.nomeCitta }}</td>
+                  <td class="col-invio" data-etichetta="Inviata">{{ testoInvio(c) }}</td>
+                  <td class="col-azione">
+                    @if (azione(c); as a) {
+                      <span class="az-testo">{{ a.testo }}</span>
+                      @if (a.data) {
+                        <small [class.scaduta]="a.scaduta">{{ a.data }}</small>
+                      }
+                    } @else {
+                      <span class="tenue">Nessuna</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  }
+  @default {
+    <app-scheletro etichetta="Sto caricando le candidature" [righe]="[1, 2, 3, 4, 5, 6]" />
+  }
+}

@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 
 @Entity (name = "ACCOUNT")
 public class Account {
@@ -39,6 +40,15 @@ public class Account {
         this.cognome = cognome;
         this.email = email;
         this.password = password;
+    }
+
+    //--------------------- CALLBACK JPA ---------------------//
+
+    @PrePersist
+    private void onCreate() {
+        if (dataCreazione == null) {
+            dataCreazione = LocalDate.now();
+        }
     }
 
     //--------------------- GETTER E SETTER ---------------------//
@@ -81,5 +91,13 @@ public class Account {
 
     public void setPassword(String password) {
         this.password = password;
-    }   
+    }
+
+    public LocalDate getDataCreazione() {
+        return dataCreazione;
+    }
+
+    public void setDataCreazione(LocalDate dataCreazione) {
+        this.dataCreazione = dataCreazione;
+    }
 }

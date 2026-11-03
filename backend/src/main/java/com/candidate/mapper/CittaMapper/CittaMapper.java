@@ -6,4 +6,5 @@ import com.candidate.entity.Citta;
 public interface CittaMapper {
     CittaDTO toDTO(Citta citta);
     Citta toEntity(CittaDTO cittaDTO);
+    void updateEntity(CittaDTO cittaDTO, Citta citta);
 }

@@ -1,0 +1,35 @@
+<section class="grafico" [attr.aria-labelledby]="idTitolo">
+  <header>
+    <h3 [id]="idTitolo">{{ titolo() }}</h3>
+    @if (!vuoto()) {
+      <button type="button" class="btn testo piccolo" (click)="scambia()" [attr.aria-pressed]="comeTabella()">
+        {{ etichettaPulsante() }}
+      </button>
+    }
+  </header>
+  @if (vuoto(); as v) {
+    <p class="vuoto">{{ v }}</p>
+  } @else if (comeTabella()) {
+    <app-tabella-dati [modello]="tabella()" [didascalia]="titolo()" />
+  } @else {
+    <div class="scorri" [attr.tabindex]="larghezzaMinima() ? 0 : null" [attr.role]="larghezzaMinima() ? 'region' : null" [attr.aria-label]="larghezzaMinima() ? titolo() + ', scorri per vedere tutto' : null">
+    <div
+      class="tela"
+      echarts
+      [options]="opzioni()"
+      [style.height.px]="altezza()"
+      [style.min-width.px]="larghezzaMinima() || null"
+      [initOpts]="{ renderer: 'canvas' }"
+      (chartInit)="alAvvio($event)"
+      tabindex="0"
+      role="img"
+      [attr.aria-label]="descrizione() + ' Usa le frecce per scorrere i valori.'"
+      (keydown)="tasto($event)"
+      (focus)="alFocus()"
+    ></div>
+    </div>
+  }
+  @if (nota()) {
+    <p class="nota">{{ nota() }}</p>
+  }
+</section>

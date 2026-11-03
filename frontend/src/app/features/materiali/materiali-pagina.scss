@@ -1,0 +1,88 @@
+.blocco {
+  margin-bottom: 34px;
+}
+
+.intesta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+
+  h2 {
+    margin-bottom: 0;
+  }
+}
+
+.riga small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.stat {
+  display: flex;
+  gap: 8px 22px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+.pochi {
+  background: var(--sabbia);
+  color: var(--testo-2);
+  margin-left: 6px;
+}
+
+.az {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.gruppo {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--testo-2);
+  margin: 18px 0 8px;
+}
+
+.modelli {
+  display: grid;
+  gap: 12px;
+}
+
+.modello {
+  padding: 16px 20px;
+
+  .testa {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  pre {
+    margin: 0;
+    font: inherit;
+    white-space: pre-wrap;
+    color: var(--testo-2);
+    background: var(--avorio);
+    border-radius: var(--r-campo);
+    padding: 12px 14px;
+    max-height: 190px;
+    overflow: auto;
+  }
+}
+
+@media (max-width: 1050px) {
+  .riga {
+    grid-template-columns: 1fr;
+  }
+
+  .az {
+    justify-content: flex-start;
+  }
+}
