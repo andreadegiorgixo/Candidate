@@ -1,4 +1,12 @@
-<app-testata titolo="Andamento" sottotitolo="Come sta andando la ricerca, calcolato sulle tue candidature." />
+<app-testata titolo="Andamento">
+  @if (stato() === 'pronto') {
+    <div class="periodo" role="group" aria-label="Periodo">
+      @for (p of periodi; track p.valore) {
+        <button type="button" [attr.aria-pressed]="filtri().periodo === p.valore" (click)="scegliPeriodo(p.valore)">{{ p.etichetta }}</button>
+      }
+    </div>
+  }
+</app-testata>
 
 @switch (stato()) {
   @case ('errore') {
@@ -10,47 +18,17 @@
     </app-stato-vuoto>
   }
   @case ('pronto') {
-    <div class="filtri" role="group" aria-label="Filtri dell’andamento">
-      <div class="periodo" role="group" aria-label="Periodo">
-        @for (p of periodi; track p.valore) {
-          <button type="button" [attr.aria-pressed]="filtri().periodo === p.valore" (click)="scegliPeriodo(p.valore)">{{ p.etichetta }}</button>
+    <section class="blocco" aria-labelledby="t-andamento">
+      <h2 class="t" id="t-andamento">Andamento</h2>
+      <div class="numeri">
+        @for (n of numeri(); track n.etichetta) {
+          <div class="numero">
+            <span class="etichetta">{{ n.etichetta }}</span>
+            <span class="valore">{{ n.valore }}</span>
+            <span class="sotto">{{ n.sotto }}</span>
+          </div>
         }
       </div>
-      <mat-form-field appearance="outline" class="sel">
-        <mat-label>Modalità</mat-label>
-        <mat-select [value]="filtri().modalita" (selectionChange)="scegliModalita($event.value)">
-          <mat-option value="">Tutte</mat-option>
-          @for (m of modalita; track m) {
-            <mat-option [value]="m">{{ etichettaModalita[m] }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="sel">
-        <mat-label>Fonte</mat-label>
-        <mat-select [value]="filtri().fonte" (selectionChange)="scegliFonte($event.value)">
-          <mat-option value="">Tutte</mat-option>
-          @for (o of fonti; track o) {
-            <mat-option [value]="o">{{ etichettaFonte[o] }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <p class="conta tenue" aria-live="polite">{{ nFiltrate() }} {{ nFiltrate() === 1 ? 'candidatura considerata' : 'candidature considerate' }}</p>
-    </div>
-
-    <section class="blocco" aria-labelledby="t-segnali">
-      <h2 class="t" id="t-segnali">Segnali</h2>
-      @if (segnali().length) {
-        <div class="pann segnali">
-          <ul>
-            @for (s of segnali(); track s) {
-              <li>{{ s }}</li>
-            }
-          </ul>
-          <p class="tenue avvertenza">Descrivono cosa è successo finora, non il motivo.</p>
-        </div>
-      } @else {
-        <app-stato-vuoto titolo="Nessun segnale con questi filtri" testo="Non ci sono candidature nel periodo scelto. Allarga il periodo o togli un filtro." />
-      }
     </section>
 
     <section class="blocco" aria-labelledby="t-ritmo">
@@ -63,86 +41,6 @@
         [altezza]="ritmo().altezza"
         [vuoto]="ritmo().vuoto"
       />
-    </section>
-
-    <section class="blocco" aria-labelledby="t-percorso">
-      <h2 class="t" id="t-percorso">Percorso</h2>
-      <app-grafico
-        titolo="Dove arrivano le candidature e dove escono"
-        [descrizione]="percorso().modello?.descrizione ?? ''"
-        [opzioni]="percorso().modello?.opzioni ?? {}"
-        [tabella]="percorso().modello?.tabella ?? { colonne: [], righe: [] }"
-        [altezza]="percorso().altezza"
-        [larghezzaMinima]="640"
-        [vuoto]="percorso().vuoto"
-      />
-      @if (!percorso().vuoto) {
-        <div class="pann conversioni">
-          <h3>Da una fermata alla successiva</h3>
-          <dl>
-            @for (c of aggregato().conversioni; track c.da) {
-              <div>
-                <dt>Da {{ c.da }} a {{ c.a }}</dt>
-                <dd>
-                  @if (c.tasso === null) {
-                    Nessuna candidatura è arrivata fin qui
-                  } @else {
-                    <b>{{ percentuale(c.tasso) }}%</b> su {{ c.su }} {{ c.su === 1 ? 'candidatura' : 'candidature' }}
-                  }
-                </dd>
-              </div>
-            }
-          </dl>
-        </div>
-      }
-    </section>
-
-    <section class="blocco" aria-labelledby="t-tempo">
-      <h2 class="t" id="t-tempo">Tasso di risposta nel tempo</h2>
-      <app-grafico
-        titolo="Quante candidature ricevono risposta, mese per mese"
-        [descrizione]="tassoNelTempo().modello?.descrizione ?? ''"
-        [opzioni]="tassoNelTempo().modello?.opzioni ?? {}"
-        [tabella]="tassoNelTempo().modello?.tabella ?? { colonne: [], righe: [] }"
-        [altezza]="tassoNelTempo().altezza"
-        [vuoto]="tassoNelTempo().vuoto"
-        [nota]="nonConteggiate() ? nonConteggiate() + (nonConteggiate() === 1 ? ' candidatura inviata' : ' candidature inviate') + ' da meno giorni della soglia di attesa non ' + (nonConteggiate() === 1 ? 'è conteggiata' : 'sono conteggiate') + ': non hanno ancora avuto il tempo di ricevere risposta.' : ''"
-      />
-    </section>
-
-    <section class="blocco" aria-labelledby="t-tempi">
-      <h2 class="t" id="t-tempi">Tempi</h2>
-      <app-grafico
-        titolo="Quanti giorni passano tra una fase e l’altra"
-        [descrizione]="tempi().modello?.descrizione ?? ''"
-        [opzioni]="tempi().modello?.opzioni ?? {}"
-        [tabella]="tempi().modello?.tabella ?? { colonne: [], righe: [] }"
-        [altezza]="tempi().altezza"
-        [larghezzaMinima]="560"
-        [vuoto]="tempi().vuoto"
-        nota="Mediana dei giorni, con il numero di casi su cui è calcolata."
-      />
-    </section>
-
-    <section class="blocco" aria-labelledby="t-funziona">
-      <h2 class="t" id="t-funziona">Cosa funziona</h2>
-      @if (cosaFunziona().vuoto; as v) {
-        <app-stato-vuoto titolo="Ancora pochi dati" [testo]="v" />
-      } @else {
-        <div class="quattro">
-          @for (g of cosaFunziona().grafici; track g.titolo) {
-            <app-grafico
-              [titolo]="g.titolo"
-              [descrizione]="g.sezione.modello?.descrizione ?? ''"
-              [opzioni]="g.sezione.modello?.opzioni ?? {}"
-              [tabella]="g.sezione.modello?.tabella ?? { colonne: [], righe: [] }"
-              [altezza]="g.sezione.altezza"
-              [vuoto]="g.sezione.vuoto"
-            />
-          }
-        </div>
-        <p class="tenue nota-barre">Le barre tratteggiate indicano meno di 5 candidature: il valore è poco affidabile.</p>
-      }
     </section>
 
     <section class="blocco" aria-labelledby="t-costanza">
@@ -158,6 +56,6 @@
     </section>
   }
   @default {
-    <app-scheletro etichetta="Sto calcolando l’andamento" [righe]="[1, 2, 3, 4, 5]" />
+    <app-scheletro etichetta="Sto calcolando l’andamento" [righe]="[1, 2, 3]" />
   }
 }

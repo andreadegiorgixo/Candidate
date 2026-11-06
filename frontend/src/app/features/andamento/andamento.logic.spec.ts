@@ -10,6 +10,7 @@ import {
   mediana,
   messaggioPochiDati,
   Storici,
+  tassoColloquio,
   tassoMensile,
   tassoPerCitta,
   tassoPerCv,
@@ -326,3 +327,12 @@ describe('messaggi con pochi dati', () => {
   });
 });
 
+
+describe('tasso di arrivo al colloquio', () => {
+  it('non c’è senza invii', () => expect(tassoColloquio(calcolaPercorsoAggregato([], nessunoStorico))).toBeNull());
+
+  it('è la quota delle inviate arrivate al colloquio', () => {
+    const p = { totale: 4, raggiunte: [4, 1, 0, 0, 0, 0], collegamenti: [], conversioni: [] };
+    expect(tassoColloquio(p)).toBe(0.25);
+  });
+});

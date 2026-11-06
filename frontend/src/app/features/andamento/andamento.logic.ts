@@ -220,6 +220,11 @@ export function calcolaPercorsoAggregato(candidature: readonly Candidatura[], st
   return { totale: candidature.length, raggiunte, collegamenti, conversioni };
 }
 
+/** Quota delle inviate arrivate almeno al colloquio conoscitivo, da 0 a 1; `null` se non ci sono invii. */
+export function tassoColloquio(p: PercorsoAggregato): number | null {
+  return p.totale ? (p.raggiunte[1] ?? 0) / p.totale : null;
+}
+
 // ------------------------------------------------------ tasso nel tempo
 
 export interface PuntoMensile {
