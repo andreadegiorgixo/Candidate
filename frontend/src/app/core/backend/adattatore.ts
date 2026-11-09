@@ -64,6 +64,7 @@ export function daAccountDTO(b: AccountDTO, imp: Impostazioni = IMPOSTAZIONI_PRE
     nome: b.nome,
     cognome: b.cognome,
     email: b.email,
+    linkedin: b.linkedin ?? '',
     dataCreazione: b.dataCreazione ?? '',
     obiettivoSettimanale: imp.obiettivoSettimanale,
     sogliaAttesaGiorni: imp.sogliaAttesaGiorni,
@@ -73,7 +74,8 @@ export function daAccountDTO(b: AccountDTO, imp: Impostazioni = IMPOSTAZIONI_PRE
 /** Il backend riceve solo i campi che conosce; la password solo se è stata scritta. */
 export function aAccountDTO(i: AccountInput): AccountDTO {
   const password = i.password?.trim() ? i.password : undefined;
-  return { nome: i.nome, cognome: i.cognome, email: i.email, ...(password ? { password } : {}) };
+  // `linkedin` vuoto cancella il link
+  return { nome: i.nome, cognome: i.cognome, email: i.email, linkedin: i.linkedin.trim(), ...(password ? { password } : {}) };
 }
 
 export function impostazioniDa(i: Pick<AccountInput, 'obiettivoSettimanale' | 'sogliaAttesaGiorni'>): Impostazioni {

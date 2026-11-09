@@ -11,7 +11,6 @@ import {
   Contatto,
   ContattoInput,
   Cv,
-  CvInput,
   Modello,
   ModelloInput,
   Offerta,
@@ -21,7 +20,9 @@ import {
   StoricoEvento,
 } from '../api/models';
 import { normalizzaAzienda } from '../azienda';
+import { CV_MAX_BYTES, conTipoCv, erroreFileCv } from '../cv-file';
 import { aggiungiGiorni, oggiISO } from '../date';
+import { linkedinValido, LINKEDIN_MESSAGGIO } from '../linkedin';
 import { creaSeme, DatiAccount, DEMO_EMAIL } from './seed';
 
 /** Errore HTTP che il mock trasforma in risposta, nel formato ProblemDetail del backend. */
@@ -102,6 +103,7 @@ export class MockDb {
       nome: r.nome.trim(),
       cognome: r.cognome.trim(),
       email: r.email.trim(),
+      linkedin: '',
       dataCreazione: oggiISO(),
       obiettivoSettimanale: 10,
       sogliaAttesaGiorni: 14,
@@ -141,13 +143,14 @@ export class MockDb {
     if (input.password !== undefined && input.password.length > 0 && input.password.length < 8) {
       errori['password'] = 'La password deve avere almeno 8 caratteri';
     }
+    if (!linkedinValido(input.linkedin ?? '')) errori['linkedin'] = LINKEDIN_MESSAGGIO;
     if (Object.keys(errori).length) throw new ErroreMock(400, 'Dati non validi', errori);
     const altro = [...this.sessioni.values()].find(
       (x) => x.account.id !== id && x.account.email.toLowerCase() === input.email.trim().toLowerCase(),
     );
     if (altro) throw new ErroreMock(409, 'Esiste già un account con questa email');
     const { password, ...resto } = input;
-    s.account = { ...s.account, ...resto, email: input.email.trim() };
+    s.account = { ...s.account, ...resto, email: input.email.trim(), linkedin: (input.linkedin ?? '').trim() };
     if (password) s.password = password;
     return this.pubblico(s.account);
   }
@@ -266,10 +269,59 @@ export class MockDb {
   aggiornaContatto = (id: number, r: number, i: ContattoInput) => this.aggiorna(this.dati(id).contatti, r, i);
   eliminaContatto = (id: number, r: number) => void (this.dati(id).contatti = this.elimina(this.dati(id).contatti, r));
 
+  // ---- CV: file veri solo se caricati in questa sessione; quelli del seme hanno un PDF finto ----
+
+  private readonly fileCv = new Map<string, File>();
+
   cv = (id: number): Cv[] => this.elenco(this.dati(id).cv);
-  creaCv = (id: number, i: CvInput) => this.crea(this.dati(id).cv, i);
-  aggiornaCv = (id: number, r: number, i: CvInput) => this.aggiorna(this.dati(id).cv, r, i);
-  eliminaCv = (id: number, r: number) => void (this.dati(id).cv = this.elimina(this.dati(id).cv, r));
+
+  private validaCv(nome: string | null, file: File | null, fileObbligatorio: boolean): string {
+    if (file && file.size > CV_MAX_BYTES) {
+      throw new ErroreMock(413, 'Il file supera il limite di 5 MB', { file: 'Il file supera il limite di 5 MB' });
+    }
+    const errori: Record<string, string> = {};
+    const pulito = (nome ?? '').trim();
+    if (!pulito) errori['nome'] = 'Il nome della versione è obbligatorio';
+    if (file) {
+      const errore = erroreFileCv(file);
+      if (errore) errori['file'] = errore;
+    } else if (fileObbligatorio) {
+      errori['file'] = 'Scegli il file del CV';
+    }
+    if (Object.keys(errori).length) throw new ErroreMock(400, 'Dati non validi', errori);
+    return pulito;
+  }
+
+  creaCv(id: number, nome: string | null, file: File | null): Cv {
+    const pulito = this.validaCv(nome, file, true);
+    const f = conTipoCv(file!);
+    const cv: Cv = { id: this.prossimoId.altro++, nome: pulito, nomeFile: f.name, contentType: f.type, dimensione: f.size, dataCaricamento: new Date().toISOString() };
+    this.dati(id).cv.push(cv);
+    this.fileCv.set(`${id}:${cv.id}`, f);
+    return { ...cv };
+  }
+
+  aggiornaCv(id: number, idCv: number, nome: string | null, file: File | null): Cv {
+    const lista = this.dati(id).cv;
+    const i = lista.findIndex((x) => x.id === idCv);
+    if (i < 0) throw new ErroreMock(404, 'Elemento non trovato');
+    const pulito = this.validaCv(nome, file, false);
+    if (!file) return (lista[i] = { ...lista[i], nome: pulito });
+    const f = conTipoCv(file);
+    this.fileCv.set(`${id}:${idCv}`, f);
+    return (lista[i] = { ...lista[i], nome: pulito, nomeFile: f.name, contentType: f.type, dimensione: f.size, dataCaricamento: new Date().toISOString() });
+  }
+
+  eliminaCv(id: number, idCv: number): void {
+    this.dati(id).cv = this.elimina(this.dati(id).cv, idCv);
+    this.fileCv.delete(`${id}:${idCv}`);
+  }
+
+  scaricaCv(id: number, idCv: number): Blob {
+    const cv = this.dati(id).cv.find((x) => x.id === idCv);
+    if (!cv) throw new ErroreMock(404, 'Elemento non trovato');
+    return this.fileCv.get(`${id}:${idCv}`) ?? new Blob([`%PDF-1.4\n% ${cv.nome} (file di esempio del mock)\n%%EOF\n`], { type: cv.contentType });
+  }
 
   modelli = (id: number): Modello[] => this.elenco(this.dati(id).modelli);
   creaModello = (id: number, i: ModelloInput) => this.crea(this.dati(id).modelli, i);

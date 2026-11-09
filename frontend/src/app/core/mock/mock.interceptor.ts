@@ -37,6 +37,12 @@ function errore(req: HttpRequest<unknown>, e: ErroreMock): Observable<never> {
 
 type Corpo = Record<string, unknown>;
 
+function campiCv(corpo: unknown): [string | null, File | null] {
+  const form = corpo as FormData;
+  const file = form.get('file');
+  return [form.get('nome') as string | null, file instanceof File ? file : null];
+}
+
 export const mockInterceptor: HttpInterceptorFn = (req, next) => {
   const m = /^\/api(\/[^?]*)/.exec(req.url);
   if (!m) return next(req);
@@ -89,14 +95,29 @@ export const mockInterceptor: HttpInterceptorFn = (req, next) => {
       if (metodo === 'POST') return ok(req, db.creaCitta(corpo), 201);
     }
 
+    // CV: multipart con `nome` e `file`, come il backend vero.
+    if (percorso === '/cv') {
+      if (metodo === 'GET') return ok(req, db.cv(id));
+      if (metodo === 'POST') return ok(req, db.creaCv(id, ...campiCv(corpo)), 201);
+    }
+    r = /^\/cv\/(\d+)(\/file)?$/.exec(percorso);
+    if (r) {
+      const idCv = Number(r[1]);
+      if (r[2] && metodo === 'GET') return ok(req, db.scaricaCv(id, idCv));
+      if (!r[2] && metodo === 'PUT') return ok(req, db.aggiornaCv(id, idCv, ...campiCv(corpo)));
+      if (!r[2] && metodo === 'DELETE') {
+        db.eliminaCv(id, idCv);
+        return ok(req, null, 204);
+      }
+    }
+
     const risorse: Record<string, Record<'elenco' | 'crea' | 'aggiorna' | 'elimina', (...a: never[]) => unknown>> = {
       colloquio: { elenco: db.colloqui, crea: db.creaColloquio, aggiorna: db.aggiornaColloquio, elimina: db.eliminaColloquio },
       contatto: { elenco: db.contatti, crea: db.creaContatto, aggiorna: db.aggiornaContatto, elimina: db.eliminaContatto },
-      cv: { elenco: db.cv, crea: db.creaCv, aggiorna: db.aggiornaCv, elimina: db.eliminaCv },
       modello: { elenco: db.modelli, crea: db.creaModello, aggiorna: db.aggiornaModello, elimina: db.eliminaModello },
       offerta: { elenco: db.offerte, crea: db.creaOfferta, aggiorna: db.aggiornaOfferta, elimina: db.eliminaOfferta },
     };
-    r = /^\/(colloquio|contatto|cv|modello|offerta)(?:\/(\d+))?$/.exec(percorso);
+    r = /^\/(colloquio|contatto|modello|offerta)(?:\/(\d+))?$/.exec(percorso);
     if (r) {
       const ris = risorse[r[1]];
       const idR = r[2] ? Number(r[2]) : null;

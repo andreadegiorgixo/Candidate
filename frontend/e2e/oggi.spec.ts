@@ -15,6 +15,51 @@ test.describe('Oggi', () => {
     await expect(page.getByText(/Prepara il colloquio tecnico con Nordvento/)).toBeVisible();
   });
 
+  test('«Da fare» sta in cima, sotto la testata e sopra la linea, a tutta larghezza', async ({ page }) => {
+    const daFare = page.getByRole('region', { name: 'Da fare' });
+    const linea = page.getByRole('heading', { name: /Dove si trovano le \d+ candidature ancora in corso/ });
+    const [a, b] = [await daFare.boundingBox(), await linea.boundingBox()];
+    expect(a!.y).toBeLessThan(b!.y);
+    const titolo = await page.getByRole('heading', { level: 1 }).boundingBox();
+    expect(a!.y).toBeGreaterThan(titolo!.y);
+    const pagina = await page.locator('app-oggi-pagina').boundingBox();
+    expect(a!.width).toBeGreaterThan(pagina!.width * 0.9);
+  });
+
+  test('«Andamento in breve» mostra tre riquadri', async ({ page }) => {
+    const sezione = page.getByRole('region', { name: 'Andamento in breve' });
+    await expect(sezione.getByRole('listitem')).toHaveCount(3);
+    await expect(sezione.getByText('Inviate negli ultimi 30 giorni')).toBeVisible();
+    await expect(sezione.getByText('Risposte', { exact: true })).toBeVisible();
+    await expect(sezione.getByText('Colloqui fatti')).toBeVisible();
+    await expect(sezione.getByText(/^\d+ su \d+$/)).toBeVisible();
+  });
+
+  test('in fondo ci sono Ritmo e Costanza, con l’alternativa a tabella', async ({ page }) => {
+    // I grafici arrivano con @defer quando il segnaposto entra nello schermo.
+    await page.locator('.posto-grafici, app-ritmo-costanza').first().scrollIntoViewIfNeeded();
+    const costanza = page.getByRole('region', { name: 'Costanza' });
+    await costanza.scrollIntoViewIfNeeded();
+    await expect(page.getByRole('heading', { name: 'Ritmo', level: 2 })).toBeVisible();
+    const grafico = costanza.locator('app-grafico');
+    await expect(grafico.locator('canvas')).toBeVisible();
+    await grafico.getByRole('button', { name: 'Vedi come tabella' }).click();
+    await expect(grafico.getByRole('table')).toBeVisible();
+  });
+
+  test('il vecchio indirizzo /andamento porta a Oggi', async ({ page }) => {
+    await page.goto('/andamento');
+    await expect(page).toHaveURL(/\/oggi/);
+  });
+
+  test('a 390px i riquadri vanno in colonna e la pagina non scorre in orizzontale', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const riquadri = page.getByRole('region', { name: 'Andamento in breve' }).getByRole('listitem');
+    const [uno, due] = [await riquadri.nth(0).boundingBox(), await riquadri.nth(1).boundingBox()];
+    expect(due!.y).toBeGreaterThan(uno!.y + uno!.height - 1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  });
+
   test('ogni fermata apre Candidature filtrata', async ({ page }) => {
     await page.getByRole('link', { name: /^Tecnico 1: \d+ candidature/ }).click();
     await expect(page).toHaveURL(/fermata=2/);

@@ -40,7 +40,6 @@ export class Shell {
   protected readonly voci: Voce[] = [
     { percorso: '/oggi', etichetta: 'Oggi', icona: 'oggi', contatore: 'oggi', descrizioneContatore: (n) => `${n} ${n === 1 ? 'cosa' : 'cose'} da fare` },
     { percorso: '/candidature', etichetta: 'Candidature', icona: 'candidature' },
-    { percorso: '/andamento', etichetta: 'Andamento', icona: 'andamento' },
     { percorso: '/colloqui', etichetta: 'Colloqui', icona: 'colloqui', contatore: 'colloqui', descrizioneContatore: (n) => `${n} in programma` },
     { percorso: '/aziende', etichetta: 'Aziende', icona: 'aziende' },
     { percorso: '/materiali', etichetta: 'Materiali', icona: 'materiali' },

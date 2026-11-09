@@ -17,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
@@ -48,9 +49,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 "Operazione in conflitto con i dati esistenti");
     }
 
+    // se l'errore riguarda un campo, lo riporta anche in "errors" (come per la validazione dei body)
     @ExceptionHandler(BadRequestException.class)
     ProblemDetail handleBadRequest(BadRequestException ex) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        if (ex.getCampo() != null) {
+            problem.setProperty("errors", Map.of(ex.getCampo(), ex.getMessage()));
+        }
+        return problem;
+    }
+
+    @ExceptionHandler(FileTroppoGrandeException.class)
+    ProblemDetail handleFileTroppoGrande(FileTroppoGrandeException ex) {
+        return fileTroppoGrande(ex.getMessage());
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
@@ -67,6 +78,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     ProblemDetail handleUnexpected(Exception ex) {
         log.error("Errore non gestito", ex);
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Errore interno del server");
+    }
+
+    // limite di dimensione del multipart superato (spring.servlet.multipart.max-file-size / max-request-size)
+    @Override
+    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        return handleExceptionInternal(ex, fileTroppoGrande("Il file supera il limite di 5 MB"), headers,
+                HttpStatus.PAYLOAD_TOO_LARGE, request);
+    }
+
+    private ProblemDetail fileTroppoGrande(String messaggio) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.PAYLOAD_TOO_LARGE, messaggio);
+        problem.setProperty("errors", Map.of("file", messaggio));
+        return problem;
     }
 
     // aggiunge al 400 la mappa campo -> messaggio

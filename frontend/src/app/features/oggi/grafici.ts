@@ -1,8 +1,8 @@
 import type { EChartsCoreOption } from 'echarts/core';
-import { aggiungiGiorni, DataISO, formatoBreve, formatoCompleto, nomeGiorno } from '../../core/date';
+import { DataISO, formatoBreve, formatoCompleto, nomeGiorno } from '../../core/date';
 import { TabellaModello } from '../../shared/tabella-dati/tabella-dati';
 import { CATEGORIE, FONT, GRIGLIA, TESTO, TESTO_2 } from '../../shared/grafico/palette';
-import { Giorno, Settimana } from './andamento.logic';
+import { Giorno, Settimana } from './ritmo.logic';
 
 /** Un grafico completo: opzioni, tabella alternativa e descrizione per chi non lo vede. */
 export interface ModelloGrafico {
@@ -140,9 +140,4 @@ export function graficoCalendario(giorni: Giorno[], da: DataISO, a: DataISO): Mo
       series: [{ type: 'heatmap', coordinateSystem: 'calendar', name: 'Invii', data: giorni.map((g) => [g.data, g.n]) }],
     },
   };
-}
-
-/** Primo giorno del calendario: ultime `settimane` settimane. */
-export function inizioCalendario(oggi: DataISO, settimane: number): DataISO {
-  return aggiungiGiorni(oggi, -(settimane * 7 - 1));
 }

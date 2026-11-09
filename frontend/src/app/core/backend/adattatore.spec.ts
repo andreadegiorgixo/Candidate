@@ -3,6 +3,7 @@ import { candidatura, MILANO } from '../testing/fabbriche';
 import {
   aAccountDTO,
   ANNUNCIO_NON_INDICATO,
+  daAccountDTO,
   daAuthDTO,
   daCandidatureDTO,
   dividiCandidatura,
@@ -30,11 +31,19 @@ describe('adattatore del backend', () => {
   });
 
   it('manda la password solo se scritta', () => {
-    const base = { nome: 'A', cognome: 'B', email: 'a@b.it', obiettivoSettimanale: 5, sogliaAttesaGiorni: 7 };
-    expect(aAccountDTO({ ...base, password: '' })).toEqual({ nome: 'A', cognome: 'B', email: 'a@b.it' });
+    const base = { nome: 'A', cognome: 'B', email: 'a@b.it', linkedin: '', obiettivoSettimanale: 5, sogliaAttesaGiorni: 7 };
+    expect(aAccountDTO({ ...base, password: '' })).toEqual({ nome: 'A', cognome: 'B', email: 'a@b.it', linkedin: '' });
     expect(aAccountDTO({ ...base, password: '   ' })).not.toHaveProperty('password');
     expect(aAccountDTO({ ...base, password: 'segreta123' })).toHaveProperty('password', 'segreta123');
     expect(aAccountDTO(base)).not.toHaveProperty('obiettivoSettimanale');
+  });
+
+  it('il link LinkedIn va al backend senza spazi e torna come stringa vuota se manca', () => {
+    const base = { nome: 'A', cognome: 'B', email: 'a@b.it', obiettivoSettimanale: 5, sogliaAttesaGiorni: 7 };
+    expect(aAccountDTO({ ...base, linkedin: '  https://www.linkedin.com/in/ada ' }).linkedin).toBe('https://www.linkedin.com/in/ada');
+    expect(aAccountDTO({ ...base, linkedin: '' }).linkedin).toBe('');
+    expect(daAccountDTO({ id: 1, nome: 'A', cognome: 'B', email: 'a@b.it' }).linkedin).toBe('');
+    expect(daAccountDTO({ id: 1, nome: 'A', cognome: 'B', email: 'a@b.it', linkedin: 'https://linkedin.com/in/a' }).linkedin).toBe('https://linkedin.com/in/a');
   });
 
   it('separa i campi del backend da quelli che restano nel browser', () => {

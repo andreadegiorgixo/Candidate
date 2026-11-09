@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/api/cv/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["update"];
+        post?: never;
+        delete: operations["delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/citta/{id}": {
         parameters: {
             query?: never;
@@ -12,7 +28,7 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getById"];
-        put: operations["update"];
+        put: operations["update_1"];
         post?: never;
         delete?: never;
         options?: never;
@@ -28,7 +44,7 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getById_1"];
-        put: operations["update_1"];
+        put: operations["update_2"];
         post?: never;
         delete?: never;
         options?: never;
@@ -52,7 +68,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/citta": {
+    "/api/cv": {
         parameters: {
             query?: never;
             header?: never;
@@ -68,7 +84,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/candidatura": {
+    "/api/citta": {
         parameters: {
             query?: never;
             header?: never;
@@ -78,6 +94,22 @@ export interface paths {
         get: operations["findAll_1"];
         put?: never;
         post: operations["create_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidatura": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findAll_2"];
+        put?: never;
+        post: operations["create_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -130,6 +162,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["updateStato"];
+        trace?: never;
+    };
+    "/api/cv/{id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/candidatura/stato": {
@@ -206,7 +254,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["delete"];
+        delete: operations["delete_1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -222,7 +270,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["delete_1"];
+        delete: operations["delete_2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -248,6 +296,17 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CvDTO: {
+            /** Format: int64 */
+            id?: number;
+            nome?: string;
+            nomeFile?: string;
+            contentType?: string;
+            /** Format: int64 */
+            dimensione?: number;
+            /** Format: date-time */
+            dataCaricamento?: string;
+        };
         CittaDTO: {
             /** Format: int64 */
             id?: number;
@@ -283,6 +342,7 @@ export interface components {
             /** Format: email */
             email: string;
             password?: string;
+            linkedin?: string;
             /** Format: date */
             dataCreazione?: string;
         };
@@ -310,6 +370,57 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    update: {
+        parameters: {
+            query?: {
+                nome?: string;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CvDTO"];
+                };
+            };
+        };
+    };
+    delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     getById: {
         parameters: {
             query?: never;
@@ -332,7 +443,7 @@ export interface operations {
             };
         };
     };
-    update: {
+    update_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -380,7 +491,7 @@ export interface operations {
             };
         };
     };
-    update_1: {
+    update_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -456,6 +567,55 @@ export interface operations {
     };
     findAll: {
         parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CvDTO"][];
+                };
+            };
+        };
+    };
+    create: {
+        parameters: {
+            query?: {
+                nome?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CvDTO"];
+                };
+            };
+        };
+    };
+    findAll_1: {
+        parameters: {
             query?: {
                 nome?: string;
             };
@@ -476,7 +636,7 @@ export interface operations {
             };
         };
     };
-    create: {
+    create_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -500,7 +660,7 @@ export interface operations {
             };
         };
     };
-    findAll_1: {
+    findAll_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -520,7 +680,7 @@ export interface operations {
             };
         };
     };
-    create_1: {
+    create_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -618,6 +778,28 @@ export interface operations {
             };
         };
     };
+    download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
     findByStatoCandidatura: {
         parameters: {
             query: {
@@ -704,7 +886,7 @@ export interface operations {
             };
         };
     };
-    delete: {
+    delete_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -724,7 +906,7 @@ export interface operations {
             };
         };
     };
-    delete_1: {
+    delete_2: {
         parameters: {
             query?: never;
             header?: never;

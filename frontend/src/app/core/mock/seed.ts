@@ -174,15 +174,17 @@ export function creaSeme(oggi: DataISO): Seme {
     nome: 'Elisa',
     cognome: 'Marchetti',
     email: DEMO_EMAIL,
+    linkedin: '',
     dataCreazione: aggiungiGiorni(oggi, -250),
     obiettivoSettimanale: 10,
     sogliaAttesaGiorni: 14,
   };
 
+  const pdf = 'application/pdf';
   const cv: Cv[] = [
-    { id: 1, nome: 'CV generale', url: 'https://example.com/cv/generale.pdf' },
-    { id: 2, nome: 'CV sviluppatore Java', url: 'https://example.com/cv/java.pdf' },
-    { id: 3, nome: 'CV breve, una pagina', url: 'https://example.com/cv/breve.pdf' },
+    { id: 1, nome: 'CV generale', nomeFile: 'elisa-marchetti-cv.pdf', contentType: pdf, dimensione: 188_416, dataCaricamento: `${aggiungiGiorni(oggi, -200)}T09:30:00.000Z` },
+    { id: 2, nome: 'CV sviluppatore Java', nomeFile: 'elisa-marchetti-cv-java.pdf', contentType: pdf, dimensione: 214_016, dataCaricamento: `${aggiungiGiorni(oggi, -120)}T17:05:00.000Z` },
+    { id: 3, nome: 'CV breve, una pagina', nomeFile: 'elisa-marchetti-cv-breve.pdf', contentType: pdf, dimensione: 96_256, dataCaricamento: `${aggiungiGiorni(oggi, -45)}T11:20:00.000Z` },
   ];
 
   const nomiLiberi = [...AZIENDE, ...DUPLICATI];

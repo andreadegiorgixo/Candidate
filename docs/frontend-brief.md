@@ -48,10 +48,10 @@ frontend/src/app/
   layout/     shell con barra laterale
   shared/     percorso, etichetta stato, stato vuoto, grafico, tabella dati
   features/
-    auth/  oggi/  candidature/  andamento/  colloqui/  aziende/  materiali/  offerte/  profilo/
+    auth/  oggi/  candidature/  colloqui/  aziende/  materiali/  offerte/  profilo/
 ```
 
-Le feature non si importano tra loro: ciò che è condiviso va in `shared/` o `core/`. I componenti di pagina orchestrano, la logica di calcolo sta in funzioni pure testabili (soprattutto i calcoli di Andamento e la coda di Oggi).
+Le feature non si importano tra loro: ciò che è condiviso va in `shared/` o `core/`. I componenti di pagina orchestrano, la logica di calcolo sta in funzioni pure testabili (soprattutto i calcoli e la coda di Oggi).
 
 ## 5. Design
 
@@ -141,7 +141,7 @@ Modalità: `REMOTO` diventa "Da remoto", `IBRIDO` "Ibrido", `INSEDE` "In sede".
 
 ## 7. Pagine
 
-La barra laterale è sempre visibile su desktop, nell'ordine: Oggi, Candidature, Andamento, Colloqui, Aziende, Materiali, Offerte e, separato in basso, Profilo. Il contatore compare solo su Oggi (cose da fare), Colloqui (in programma) e Offerte (aperte). Sotto i 1050px diventa una barra orizzontale scorrevole. Ogni pagina ha un compito diverso: non ripetere gli stessi dati in forma diversa.
+La barra laterale è sempre visibile su desktop, nell'ordine: Oggi, Candidature, Colloqui, Aziende, Materiali, Offerte e, separato in basso, Profilo. Il contatore compare solo su Oggi (cose da fare), Colloqui (in programma) e Offerte (aperte). Sotto i 1050px diventa una barra orizzontale scorrevole. Ogni pagina ha un compito diverso: non ripetere gli stessi dati in forma diversa.
 
 ### Accesso (`/accedi`, `/registrati`)
 
@@ -151,10 +151,18 @@ Form brevi, errori sotto il campo. Dopo l'accesso si va a Oggi.
 
 Vedi il mockup. Titolo dinamico col numero di cose da fare; se sono zero: "Oggi non hai niente in sospeso".
 
+Dall'alto in basso: testata, **Da fare** (solo se c'è qualcosa), la linea, poi due colonne con **Andamento in breve** a sinistra e Prossimi colloqui e Questa settimana a destra, infine **Ritmo** e **Costanza** a tutta larghezza.
+
+- **Da fare:** sezione a tutta larghezza, subito sotto la testata e sopra la linea. **Compare solo se ci sono cose da fare**: quando è vuota non c'è nessuno stato vuoto, la pagina parte dalla linea (il titolo dice già "Oggi non hai niente in sospeso"). Priorità: colloqui entro 48 ore; offerte in scadenza entro 7 giorni; prossime azioni scadute o di oggi; candidature in attesa da troppo. Ogni riga ha un'azione che si completa senza cambiare pagina quando possibile.
 - **La linea:** conteggi delle candidature in corso per fermata, più il riepilogo delle uscite. Ogni fermata apre Candidature filtrata.
-- **Da fare**, con questa priorità: colloqui entro 48 ore; offerte in scadenza entro 7 giorni; prossime azioni scadute o di oggi; candidature in attesa da troppo. Ogni riga ha un'azione che si completa senza cambiare pagina quando possibile.
+- **Andamento in breve:** colonna principale, tre riquadri numerici in riga (in colonna quando la sezione è stretta, quindi anche a 390px). Il calcolo è `riepilogoAndamento` in `oggi.logic.ts`, che restituisce anche i testi.
+  - **Inviate negli ultimi 30 giorni:** candidature con `dataCandidatura >= oggi - 30 giorni`, oggi compreso. Sotto, il confronto con i 30 giorni precedenti (da oggi-60 incluso a oggi-30 escluso): "3 in più del mese prima", "2 in meno del mese prima", "Come il mese prima". Se nel mese prima non ce ne sono e l'account non ha candidature più vecchie, niente confronto.
+  - **Risposte:** "X su Y" con `calcolaTasso` su tutte le candidature. La percentuale compare solo se Y è almeno 5 (sotto, la percentuale non è affidabile). Restano fuori da Y le candidature ancora in attesa inviate da non più di `sogliaAttesa` giorni (non hanno avuto il tempo di rispondere); il sottotitolo lo dice: "tra quelle inviate da più di 14 giorni". È una stima prudente: Oggi non carica lo storico (una richiesta per candidatura), quindi chi ha risposto ed è poi passato a "Senza risposta" non conta tra le risposte.
+  - **Colloqui fatti:** colloqui con `dataOra` già passata e aziende distinte (stesso nome normalizzato = una azienda): "5" e "colloqui con 3 aziende". Con zero: "0" e "Ancora nessuno".
+  - Con zero candidature resta lo stato vuoto generale della pagina.
 - **Prossimi colloqui:** i prossimi tre.
 - **Questa settimana:** invii rispetto all'obiettivo, con dieci tacche proporzionali.
+- **Ritmo e Costanza:** i due grafici della sezione 8, in fondo alla pagina. Stanno nel componente `ritmo-costanza.ts`, caricato con `@defer (on viewport)`: ECharts si scarica solo quando la sezione sta per entrare nello schermo.
 
 ### Candidature (`/candidature`) — "gestisco tutto qui"
 
@@ -166,9 +174,9 @@ Vedi il mockup. Titolo dinamico col numero di cose da fare; se sono zero: "Oggi 
 - **Spontanee:** se `spontanea` è vera, il campo `jobOffert` si etichetta "Link o testo del messaggio inviato"; altrimenti "Link all'annuncio". La città si cerca con autocomplete e, se manca, si crea dal form.
 - **Esporta CSV** con i filtri applicati.
 
-### Andamento (`/andamento`) — "come sta andando?"
+### Andamento (eliminata)
 
-Specifica nella sezione 8.
+La pagina è confluita in Oggi: i tre numeri erano già in "Andamento in breve", Ritmo e Costanza sono in fondo a Oggi. `/andamento` reindirizza a `/oggi`.
 
 ### Colloqui (`/colloqui`) — "arrivo preparato e imparo da ognuno"
 
@@ -182,7 +190,8 @@ Raggruppa le candidature per azienda, ignorando maiuscole e spazi. Elenco con nu
 
 ### Materiali (`/materiali`) — "quale CV funziona?"
 
-- **Versioni del CV:** nome e link, senza caricamento file. Accanto a ognuna: candidature inviate e tasso di risposta.
+- **Profilo LinkedIn:** blocco sopra le versioni del CV. Il link si inserisce, si modifica e si rimuove; quando c'è compare come link che si apre in una nuova scheda. È salvato sull'account (`linkedin`) e si modifica anche in Profilo. Vuoto oppure `http(s)` di `linkedin.com` (anche `www.` e sottodomini come `it.linkedin.com`).
+- **Versioni del CV:** nome e **file caricato dal computer** (PDF, DOC o DOCX, al massimo 5 MB), con scelta dal pulsante o trascinamento sul riquadro. Ogni versione mostra nome, nome del file, dimensione, data di caricamento e un pulsante «Scarica» (richiesta autenticata, salvata come Blob). In modifica il file è facoltativo: se non si sceglie, resta quello attuale. Accanto a ognuna: candidature inviate e tasso di risposta.
 - **Modelli di messaggio:** sollecito, ringraziamento, spontanea. Segnaposto `{azienda}`, `{ruolo}`, `{contatto}`, compilati quando il modello è aperto da una candidatura. Pulsante "Copia testo".
 
 ### Offerte (`/offerte`) — "quale accetto?"
@@ -191,23 +200,18 @@ Confronto affiancato delle proposte aperte: RAL, variabile, giorni da remoto, fe
 
 ### Profilo (`/profilo`)
 
-Dati personali, password, obiettivo settimanale (predefinito 10), soglia di attesa (predefinita 14 giorni), esportazione completa, eliminazione dell'account con conferma digitando l'email.
+Dati personali (compreso il link al profilo LinkedIn, facoltativo), password, obiettivo settimanale (predefinito 10), soglia di attesa (predefinita 14 giorni), esportazione completa, eliminazione dell'account con conferma digitando l'email.
 
 ### Ricerca globale
 
 `Cmd+K` o `Ctrl+K` su qualsiasi pagina: cerca aziende, ruoli e contatti, e porta alle azioni principali.
 
-## 8. Andamento: specifica dei grafici
+## 8. Grafici di Oggi: Ritmo e Costanza
 
-Filtri in una riga sopra tutto: periodo (30 giorni, 90 giorni, 12 mesi, tutto), modalità, fonte. Ordine della pagina:
+Niente filtri: ogni grafico ha il suo periodo fisso.
 
-1. **Segnali:** da due a quattro frasi calcolate con regole, non con AI. Esempio: "Finora le candidature da remoto ricevono risposta il doppio di quelle in sede (42% contro 21%)." Una frase appare solo se entrambi i gruppi hanno almeno 10 candidature e la differenza è almeno 1,5 volte. Non affermare mai cause.
-2. **Ritmo:** colonne degli invii per settimana, con linea tratteggiata dell'obiettivo.
-3. **Percorso:** diagramma Sankey dagli invii agli esiti, con le uscite separate. Sotto, la conversione tra ogni fermata e il numero di candidature su cui è calcolata.
-4. **Tasso di risposta nel tempo:** linea mensile. **Escludi le candidature inviate da meno giorni della soglia di attesa**, altrimenti gli ultimi mesi sembrano sempre in calo.
-5. **Tempi:** barre orizzontali con la **mediana** dei giorni per fase, e il numero di casi. Niente medie.
-6. **Cosa funziona:** quattro piccoli grafici a barre orizzontali affiancati con il tasso di risposta per modalità, fonte, versione del CV e città (prime cinque più "Altre"). Sotto le 5 candidature, la barra è tratteggiata con l'etichetta "pochi dati".
-7. **Costanza:** calendario annuale degli invii per giorno.
+1. **Ritmo:** colonne degli invii per settimana negli ultimi 90 giorni, con linea tratteggiata dell'obiettivo. Sotto i 3 invii nel periodo, al posto del grafico si spiega quanti ne servono.
+2. **Costanza:** calendario annuale degli invii per giorno (26 settimane sotto i 700px).
 
 Regole per ogni grafico:
 
@@ -249,14 +253,16 @@ Candidatura {
 | `GET`, `POST`, `PUT`, `DELETE /api/colloquio` | *nuovo*: `{ id, idCandidatura, tipo, dataOra, luogoOLink, persone, checklist[], voto, domande[], daMigliorare }` |
 | `GET`, `POST`, `PUT`, `DELETE /api/contatto` | *nuovo*: `{ id, nomeAzienda, nome, ruolo, email, linkedin, note }` |
 | `GET`, `PUT /api/azienda/{nome}/promemoria` | *nuovo*: `{ nonRicontattarePrimaDel }` |
-| `GET`, `POST`, `PUT`, `DELETE /api/cv` | *nuovo*: `{ id, nome, url }` |
+| `GET /api/cv` | **collegato**: metadati `{ id, nome, nomeFile, contentType, dimensione, dataCaricamento }`, senza il file |
+| `POST /api/cv`, `PUT /api/cv/{id}` | **collegato**: `multipart/form-data` con `nome` e `file` (nel `PUT` il file è facoltativo). Solo PDF, DOC, DOCX, massimo 5 MB: `400` con `errors.file` per il tipo, `413` per la dimensione |
+| `GET /api/cv/{id}/file`, `DELETE /api/cv/{id}` | **collegato**: il download ha `Content-Disposition: attachment`; il CV di un altro account risponde `404` |
 | `GET`, `POST`, `PUT`, `DELETE /api/modello` | *nuovo*: `{ id, tipo, nome, testo }` |
 | `GET`, `POST`, `PUT`, `DELETE /api/offerta` | *nuovo*: `{ id, idCandidatura, ral, variabile, giorniRemoto, ferie, benefit, scadenza, note, voto }` |
 
 **Campi nuovi di Candidatura:** `spontanea` (boolean), `fonte` (`LINKEDIN`, `INDEED`, `SITO_AZIENDA`, `PASSAPAROLA`, `RECRUITER`, `ALTRO`), `prossimaAzioneTesto`, `prossimaAzioneData`, `idCv`.
-**Campi nuovi di Account:** `obiettivoSettimanale`, `sogliaAttesaGiorni`.
+**Campi nuovi di Account:** `obiettivoSettimanale`, `sogliaAttesaGiorni`, `linkedin` (stringa, vuota se assente; `400` con `errors.linkedin` se non è un indirizzo di linkedin.com).
 
-**Mock:** implementa tutto il contratto con un interceptor HTTP attivo solo in sviluppo, tramite `useMocks` in `src/environments/`, escluso dal bundle di produzione. I componenti non devono sapere che esiste. Dati con seme fisso e nomi inventati: circa 60 candidature su 8 mesi con storico coerente, 10 colloqui, 2 offerte aperte, 3 versioni del CV. La persistenza è in memoria. Serve anche un utente demo. I tipi stanno in `core/api/models.ts`; in fase 5 saranno sostituiti da quelli generati con `openapi-typescript` da `/v3/api-docs`.
+**Mock:** implementa tutto il contratto con un interceptor HTTP attivo solo in sviluppo, tramite `useMocks` in `src/environments/`, escluso dal bundle di produzione. I componenti non devono sapere che esiste. Dati con seme fisso e nomi inventati: circa 60 candidature su 8 mesi con storico coerente, 10 colloqui, 2 offerte aperte, 3 versioni del CV (file PDF di esempio). La persistenza è in memoria. Serve anche un utente demo. I tipi stanno in `core/api/models.ts`; in fase 5 saranno sostituiti da quelli generati con `openapi-typescript` da `/v3/api-docs`.
 
 ## 10. Fasi
 
@@ -276,7 +282,7 @@ Lavora una fase alla volta. A fine fase **fermati** e consegna il report. Non pa
 ## 11. Una fase è finita quando
 
 - `ng build` passa senza errori e `ng test` è verde.
-- Le funzioni pure di `core/` e i calcoli di Andamento e Oggi hanno test unitari, inclusi i casi limite: nessun dato, pochi dati, date a cavallo del mese.
+- Le funzioni pure di `core/` e i calcoli di Oggi hanno test unitari, inclusi i casi limite: nessun dato, pochi dati, date a cavallo del mese.
 - I flussi principali della fase hanno un test Playwright.
 - Ogni pagina è stata aperta e controllata davvero negli screenshot, con dati, senza dati, in caricamento e in errore.
 - Funziona con la sola tastiera, con focus visibile; contrasto WCAG AA; nessuno scroll orizzontale a 390px.

@@ -44,6 +44,12 @@ export class Auth {
     return this.api.aggiornaAccount(i).pipe(tap((a) => this.account.set(a)));
   }
 
+  /** Cambia solo il link LinkedIn (vuoto = rimosso), lasciando invariato il resto dell'account. */
+  impostaLinkedin(linkedin: string): Observable<Account> {
+    const { nome, cognome, email, obiettivoSettimanale, sogliaAttesaGiorni } = this.account()!;
+    return this.aggiornaAccount({ nome, cognome, email, obiettivoSettimanale, sogliaAttesaGiorni, linkedin });
+  }
+
   /** Esce e torna a `/accedi`, conservando la pagina di destinazione se richiesto. */
   esci(ritorno?: string): void {
     // Più richieste possono fallire insieme con 401: la prima conserva la pagina di destinazione.

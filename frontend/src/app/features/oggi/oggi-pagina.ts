@@ -17,13 +17,14 @@ import { Percorso } from '../../shared/percorso/percorso';
 import { StatoTag } from '../../shared/stato-tag/stato-tag';
 import { StatoVuoto } from '../../shared/stato-vuoto/stato-vuoto';
 import { Testata } from '../../shared/testata/testata';
-import { contaInCorso, contaPerFermata, invioSettimana, prossimiColloqui, riepilogoUscite, titoloOggi } from './oggi.logic';
+import { RitmoCostanza } from './ritmo-costanza';
+import { contaInCorso, contaPerFermata, invioSettimana, prossimiColloqui, riepilogoAndamento, riepilogoUscite, titoloOggi } from './oggi.logic';
 
-/** Oggi: «cosa faccio adesso?». La linea, le cose da fare, i prossimi colloqui, la settimana. */
+/** Oggi: «cosa faccio adesso?». Le cose da fare (solo se ce ne sono), la linea, l’andamento in breve, i prossimi colloqui, la settimana, e in fondo ritmo e costanza degli invii. */
 @Component({
   selector: 'app-oggi-pagina',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, LineaBanda, Percorso, StatoTag, StatoVuoto, Scheletro, ErroreCaricamento, Testata],
+  imports: [RouterLink, LineaBanda, Percorso, StatoTag, StatoVuoto, Scheletro, ErroreCaricamento, Testata, RitmoCostanza],
   templateUrl: './oggi-pagina.html',
   styleUrl: './oggi-pagina.scss',
 })
@@ -72,6 +73,16 @@ export class OggiPagina {
   });
   protected readonly settimana = computed(() => invioSettimana(this.candidature.elementi(), this.orologio.oggi(), this.auth.obiettivoSettimanale()));
   protected readonly prossimi = computed(() => prossimiColloqui(this.colloqui.elementi(), this.orologio.adesso(), 3));
+  protected readonly riquadri = computed(() => {
+    const r = riepilogoAndamento({
+      candidature: this.candidature.elementi(),
+      colloqui: this.colloqui.elementi(),
+      oggi: this.orologio.oggi(),
+      adesso: this.orologio.adesso(),
+      sogliaAttesa: this.auth.sogliaAttesa(),
+    });
+    return [r.inviate, r.risposte, r.colloqui];
+  });
   protected readonly tacche = Array.from({ length: 10 }, (_, i) => i);
 
   constructor() {

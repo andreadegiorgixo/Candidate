@@ -12,47 +12,58 @@
         <button type="button" class="btn primario" (click)="aggiungi()">Aggiungi la prima candidatura</button>
       </app-stato-vuoto>
     } @else {
+      @if (daFare().length > 0) {
+        <section class="da-fare" aria-labelledby="t-da-fare">
+          <h2 class="t" id="t-da-fare">Da fare</h2>
+          <ul class="pann">
+            @for (v of daFare(); track v.chiave) {
+              @let c = candidatura(v);
+              <li class="riga">
+                <div>
+                  <strong>{{ v.titolo }}</strong>
+                  <small>{{ v.dettaglio }}</small>
+                  <app-percorso [stato]="c.statoCandidatura" [dataCandidatura]="c.dataCandidatura" class="mini-riga" />
+                  <app-stato-tag [stato]="c.statoCandidatura" />
+                </div>
+                <div class="az">
+                  @switch (v.tipo) {
+                    @case ('colloquio') {
+                      <button type="button" class="btn piccolo primario" (click)="apriPreparazione(v)">Apri preparazione</button>
+                    }
+                    @case ('offerta') {
+                      <a class="btn piccolo primario" routerLink="/offerte">Confronta offerte</a>
+                    }
+                    @case ('azione') {
+                      <button type="button" class="btn piccolo" (click)="segnaFatta(v)">Segna come fatto</button>
+                    }
+                    @case ('attesa') {
+                      <button type="button" class="btn piccolo" (click)="scriviSollecito(v)">Scrivi un sollecito</button>
+                      <button type="button" class="btn piccolo" (click)="segnaSenzaRisposta(v)">Segna senza risposta</button>
+                    }
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
       <app-linea-banda [titolo]="titoloLinea()" [conteggi]="conteggi()" [uscite]="uscite()" />
 
       <div class="col">
-        <section aria-labelledby="t-da-fare">
-          <h2 class="t" id="t-da-fare">Da fare</h2>
-          @if (daFare().length === 0) {
-            <app-stato-vuoto titolo="Non c’è niente da fare per oggi" testo="Nessun colloquio vicino, nessuna scadenza e nessuna candidatura ferma da troppo. Puoi mandare un’altra candidatura.">
-              <button type="button" class="btn primario" (click)="aggiungi()">Aggiungi candidatura</button>
-            </app-stato-vuoto>
-          } @else {
-            <ul class="pann">
-              @for (v of daFare(); track v.chiave) {
-                @let c = candidatura(v);
-                <li class="riga">
-                  <div>
-                    <strong>{{ v.titolo }}</strong>
-                    <small>{{ v.dettaglio }}</small>
-                    <app-percorso [stato]="c.statoCandidatura" [dataCandidatura]="c.dataCandidatura" class="mini-riga" />
-                    <app-stato-tag [stato]="c.statoCandidatura" />
-                  </div>
-                  <div class="az">
-                    @switch (v.tipo) {
-                      @case ('colloquio') {
-                        <button type="button" class="btn piccolo primario" (click)="apriPreparazione(v)">Apri preparazione</button>
-                      }
-                      @case ('offerta') {
-                        <a class="btn piccolo primario" routerLink="/offerte">Confronta offerte</a>
-                      }
-                      @case ('azione') {
-                        <button type="button" class="btn piccolo" (click)="segnaFatta(v)">Segna come fatto</button>
-                      }
-                      @case ('attesa') {
-                        <button type="button" class="btn piccolo" (click)="scriviSollecito(v)">Scrivi un sollecito</button>
-                        <button type="button" class="btn piccolo" (click)="segnaSenzaRisposta(v)">Segna senza risposta</button>
-                      }
-                    }
-                  </div>
-                </li>
-              }
-            </ul>
-          }
+        <section class="andamento" aria-labelledby="t-andamento">
+          <h2 class="t" id="t-andamento">Andamento in breve</h2>
+          <ul class="riquadri">
+            @for (r of riquadri(); track r.etichetta) {
+              <li class="pann riquadro">
+                <span class="etichetta">{{ r.etichetta }}</span>
+                <strong class="valore">{{ r.valore }}</strong>
+                @if (r.sotto) {
+                  <span class="sotto">{{ r.sotto }}</span>
+                }
+              </li>
+            }
+          </ul>
         </section>
 
         <div class="dx">
@@ -105,6 +116,12 @@
           </section>
         </div>
       </div>
+
+      @defer (on viewport) {
+        <app-ritmo-costanza />
+      } @placeholder {
+        <div class="posto-grafici" aria-hidden="true"></div>
+      }
     }
   }
   @default {

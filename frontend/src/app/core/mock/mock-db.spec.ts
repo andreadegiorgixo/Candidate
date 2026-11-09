@@ -92,4 +92,56 @@ describe('mock del backend', () => {
     expect(db.promemoria(idDemo, ' ALTAVIA ').nonRicontattarePrimaDel).toBe('2026-12-01');
     expect(db.promemoria(idDemo, 'Sconosciuta').nonRicontattarePrimaDel).toBeNull();
   });
+
+  describe('CV come file', () => {
+    const pdf = (nome = 'cv.pdf', byte = 'contenuto') => new File([byte], nome, { type: 'application/pdf' });
+
+    it('carica, rinomina, sostituisce il file e scarica', async () => {
+      const prima = db.cv(idDemo).length;
+      const cv = db.creaCv(idDemo, '  Nuovo ', pdf('mio.pdf'));
+      expect(cv).toMatchObject({ nome: 'Nuovo', nomeFile: 'mio.pdf', contentType: 'application/pdf', dimensione: 9 });
+      expect(db.cv(idDemo)).toHaveLength(prima + 1);
+      expect(await db.scaricaCv(idDemo, cv.id).text()).toBe('contenuto');
+
+      expect(db.aggiornaCv(idDemo, cv.id, 'Rinominato', null)).toMatchObject({ nome: 'Rinominato', nomeFile: 'mio.pdf' });
+      const sostituito = db.aggiornaCv(idDemo, cv.id, 'Rinominato', new File(['x'], 'altro.docx'));
+      expect(sostituito).toMatchObject({ nomeFile: 'altro.docx', dimensione: 1 });
+      expect(sostituito.contentType).toContain('wordprocessingml');
+
+      db.eliminaCv(idDemo, cv.id);
+      expect(chiama(() => db.scaricaCv(idDemo, cv.id))?.stato).toBe(404);
+    });
+
+    it('i CV del seme si scaricano come PDF di esempio', async () => {
+      const blob = db.scaricaCv(idDemo, 1);
+      expect(blob.type).toBe('application/pdf');
+      expect(await blob.text()).toContain('%PDF');
+    });
+
+    it('rifiuta tipo non ammesso, file mancante, nome vuoto e file troppo grande', () => {
+      expect(chiama(() => db.creaCv(idDemo, 'X', new File(['x'], 'cv.txt')))?.errori).toHaveProperty('file');
+      expect(chiama(() => db.creaCv(idDemo, 'X', null))?.errori).toHaveProperty('file');
+      expect(chiama(() => db.creaCv(idDemo, ' ', pdf()))?.errori).toHaveProperty('nome');
+      const grande = new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'cv.pdf', { type: 'application/pdf' });
+      expect(chiama(() => db.creaCv(idDemo, 'X', grande))?.stato).toBe(413);
+      expect(chiama(() => db.aggiornaCv(idDemo, 99999, 'X', null))?.stato).toBe(404);
+    });
+  });
+
+  describe('link LinkedIn', () => {
+    const input = (linkedin: string) => ({ nome: 'E', cognome: 'M', email: DEMO_EMAIL, linkedin, obiettivoSettimanale: 10, sogliaAttesaGiorni: 14 });
+
+    it('si imposta, si legge e si rimuove', () => {
+      expect(db.account(idDemo).linkedin).toBe('');
+      expect(db.aggiornaAccount(idDemo, input(' https://www.linkedin.com/in/elisa ')).linkedin).toBe('https://www.linkedin.com/in/elisa');
+      expect(db.account(idDemo).linkedin).toBe('https://www.linkedin.com/in/elisa');
+      expect(db.aggiornaAccount(idDemo, input('')).linkedin).toBe('');
+    });
+
+    it('rifiuta gli indirizzi che non sono di LinkedIn con 400 sul campo', () => {
+      const e = chiama(() => db.aggiornaAccount(idDemo, input('https://example.com/in/elisa')));
+      expect(e?.stato).toBe(400);
+      expect(e?.errori).toHaveProperty('linkedin');
+    });
+  });
 });

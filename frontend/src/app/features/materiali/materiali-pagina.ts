@@ -1,6 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { Api } from '../../core/api/api.service';
 import { Cv, Modello } from '../../core/api/models';
+import { Auth } from '../../core/auth/auth.service';
+import { dimensioneLeggibile } from '../../core/cv-file';
+import { formatISO, formatoCompleto } from '../../core/date';
+import { erroriCampo } from '../../core/errori';
+import { LINKEDIN_MESSAGGIO, LINKEDIN_PATTERN } from '../../core/linkedin';
+import { scaricaFile } from '../../core/scarica-file';
 import { CandidatureStore, CvStore, ModelliStore, StoricoStore } from '../../core/data/archivi';
 import { Notifier } from '../../core/notifier';
 import { calcolaTasso, percentuale } from '../../core/risposte';
@@ -13,15 +23,17 @@ import { Testata } from '../../shared/testata/testata';
 import { apriCv } from './cv-dialog';
 import { apriModello } from './modello-dialog';
 
-/** Materiali: «quale CV funziona?». Versioni del CV con tasso di risposta e modelli di messaggio. */
+/** Materiali: «quale CV funziona?». Profilo LinkedIn, versioni del CV (file) con tasso di risposta e modelli di messaggio. */
 @Component({
   selector: 'app-materiali-pagina',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icona, StatoVuoto, Scheletro, ErroreCaricamento, Testata],
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, Icona, StatoVuoto, Scheletro, ErroreCaricamento, Testata],
   templateUrl: './materiali-pagina.html',
   styleUrl: './materiali-pagina.scss',
 })
 export class MaterialiPagina {
+  protected readonly auth = inject(Auth);
+  private readonly api = inject(Api);
   private readonly cvStore = inject(CvStore);
   private readonly modelliStore = inject(ModelliStore);
   private readonly candidature = inject(CandidatureStore);
@@ -31,6 +43,15 @@ export class MaterialiPagina {
 
   protected readonly tipoEtichetta = TIPO_MODELLO_ETICHETTA;
   protected readonly percentuale = percentuale;
+  protected readonly dimensione = dimensioneLeggibile;
+  protected readonly linkedinMessaggio = LINKEDIN_MESSAGGIO;
+
+  protected readonly scaricandoId = signal<number | null>(null);
+  protected readonly modificaLinkedinAperta = signal(false);
+  protected readonly salvandoLinkedin = signal(false);
+  protected readonly linkedinForm = new FormGroup({
+    linkedin: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(255), Validators.pattern(LINKEDIN_PATTERN)] }),
+  });
 
   protected readonly stato = computed(() => {
     const s = [this.cvStore.stato(), this.modelliStore.stato(), this.candidature.stato()];
@@ -54,6 +75,7 @@ export class MaterialiPagina {
   );
 
   constructor() {
+    this.auth.caricaAccount();
     this.cvStore.carica();
     this.modelliStore.carica();
     this.candidature.carica();
@@ -78,16 +100,75 @@ export class MaterialiPagina {
     void apriCv(this.dialog, v);
   }
 
+  /** Giorno di caricamento, nel fuso orario di chi guarda. */
+  protected dataCaricamento(v: Cv): string {
+    return formatoCompleto(formatISO(new Date(v.dataCaricamento)));
+  }
+
+  /** Il file si scarica con una richiesta autenticata e poi si salva col suo nome. */
+  protected scarica(v: Cv): void {
+    this.scaricandoId.set(v.id);
+    this.api.scaricaCv(v.id).subscribe({
+      next: (file) => {
+        this.scaricandoId.set(null);
+        scaricaFile(file, v.nomeFile);
+      },
+      error: (e: unknown) => {
+        this.scaricandoId.set(null);
+        this.notifier.errore(e, () => this.scarica(v));
+      },
+    });
+  }
+
+  protected apriLinkedin(attuale: string): void {
+    this.linkedinForm.reset({ linkedin: attuale });
+    this.modificaLinkedinAperta.set(true);
+  }
+
+  protected annullaLinkedin(): void {
+    this.modificaLinkedinAperta.set(false);
+  }
+
+  protected salvaLinkedin(): void {
+    if (this.linkedinForm.invalid) return void this.linkedinForm.markAllAsTouched();
+    this.impostaLinkedin(this.linkedinForm.getRawValue().linkedin.trim(), 'Link LinkedIn salvato');
+  }
+
+  protected rimuoviLinkedin(): void {
+    this.impostaLinkedin('', 'Link LinkedIn rimosso');
+  }
+
+  private impostaLinkedin(valore: string, ok: string): void {
+    this.salvandoLinkedin.set(true);
+    this.auth.impostaLinkedin(valore).subscribe({
+      next: () => {
+        this.salvandoLinkedin.set(false);
+        this.modificaLinkedinAperta.set(false);
+        this.notifier.info(ok);
+      },
+      error: (e: unknown) => {
+        this.salvandoLinkedin.set(false);
+        const errore = erroriCampo(e)?.['linkedin'];
+        if (errore && this.modificaLinkedinAperta()) this.linkedinForm.controls.linkedin.setErrors({ server: errore });
+        else this.notifier.errore(e, () => this.impostaLinkedin(valore, ok));
+      },
+    });
+  }
+
   protected async eliminaCv(v: Cv, usi: number): Promise<void> {
     const ok = await chiediConferma(this.dialog, {
       titolo: `Eliminare «${v.nome}»?`,
-      testo: usi ? `Lo usano ${usi} candidature: restano, ma senza una versione del CV indicata.` : 'Non lo usa nessuna candidatura.',
+      testo: usi ? `Lo usano ${usi} candidature: restano, ma senza una versione del CV indicata. Il file viene cancellato.` : 'Non lo usa nessuna candidatura. Il file viene cancellato.',
       conferma: 'Elimina versione',
       pericolo: true,
     });
     if (!ok) return;
     this.cvStore.elimina(v.id).subscribe({
-      next: () => this.notifier.info('Versione eliminata'),
+      next: () => {
+        // Le candidature che la usavano restano senza versione, anche in memoria.
+        this.candidature.elementi.update((l) => l.map((c) => (c.idCv === v.id ? { ...c, idCv: null } : c)));
+        this.notifier.info('Versione eliminata');
+      },
       error: (e: unknown) => this.notifier.errore(e, () => void this.eliminaCv(v, usi)),
     });
   }

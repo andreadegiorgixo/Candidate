@@ -6,6 +6,55 @@
   margin-top: 26px;
 }
 
+.da-fare {
+  margin-bottom: 26px;
+}
+
+.andamento {
+  container: andamento / inline-size;
+}
+
+/* Spazio per Ritmo e Costanza finché non arriva ECharts: evita che la pagina salti. */
+.posto-grafici {
+  height: 640px;
+  margin-top: 26px;
+}
+
+.riquadri {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.riquadro {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 14px 18px 16px;
+
+  .etichetta {
+    font-size: 13.5px;
+    font-weight: 650;
+    color: var(--testo-2);
+  }
+
+  .valore {
+    font-size: 28px;
+    font-weight: 750;
+    font-stretch: 112%;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--bosco);
+    margin: 6px 0 4px;
+    overflow-wrap: anywhere;
+  }
+
+  .sotto {
+    font-size: 13.5px;
+    color: var(--testo-2);
+  }
+}
+
 .dx {
   display: grid;
   gap: 26px;
@@ -113,6 +162,13 @@ li:last-child > .coll {
     &.on {
       background: var(--bosco);
     }
+  }
+}
+
+/* I riquadri vanno in colonna quando la sezione è stretta, qualunque sia la larghezza della finestra. */
+@container andamento (max-width: 560px) {
+  .riquadri {
+    grid-template-columns: 1fr;
   }
 }
 

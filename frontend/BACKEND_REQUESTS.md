@@ -1,6 +1,6 @@
 # Richieste al backend
 
-**Stato (fase 5, 3 novembre 2026).** Il frontend parla con il backend vero per accesso, account, candidature e città: quei dati finiscono nel database. Tutto il resto il backend non lo ha ancora, quindi il frontend lo tiene **nel browser** (`localStorage`, separato per account) e si perde cambiando browser o svuotando i dati del sito. Il punto unico in cui avviene la traduzione è `src/app/core/backend/` (`backend.interceptor.ts`, `adattatore.ts`, `archivio-locale.ts`). Ogni voce che il backend aggiunge si attiva togliendo il ramo corrispondente dell'interceptor.
+**Stato (fase 5, 6 novembre 2026).** Il frontend parla con il backend vero per accesso, account (compreso il link LinkedIn), candidature, città e **CV** (file caricati): quei dati finiscono nel database. Tutto il resto il backend non lo ha ancora, quindi il frontend lo tiene **nel browser** (`localStorage`, separato per account) e si perde cambiando browser o svuotando i dati del sito. Il punto unico in cui avviene la traduzione è `src/app/core/backend/` (`backend.interceptor.ts`, `adattatore.ts`, `archivio-locale.ts`). Ogni voce che il backend aggiunge si attiva togliendo il ramo corrispondente dell'interceptor.
 
 Il mock (`src/app/core/mock/`) resta solo per i test e per lavorare senza backend: `npm run start:mock`.
 
@@ -9,19 +9,20 @@ Il mock (`src/app/core/mock/`) resta solo per i test e per lavorare senza backen
 | Voce | Stato | Dettaglio |
 |---|---|---|
 | `POST /api/auth/register`, `/login` | **Collegato** | Il frontend traduce `{ accessToken, expiresAt }` in `{ token, scadenza }`. |
-| `GET /api/account/me` | **Collegato** | Mancano `obiettivoSettimanale` e `sogliaAttesaGiorni`: stanno nel browser (predefiniti 10 e 14). |
-| `PUT`, `DELETE /api/account/me` | **Adattato** | Non esistono: il frontend usa `PUT /api/account/{id}` e `DELETE /api/account/delete/{id}`, con l'id preso dal `sub` del token. |
-| `GET`, `POST`, `PUT`, `DELETE /api/candidatura` | **Collegato in parte** | Il backend salva solo i campi base. `spontanea`, `fonte`, `prossimaAzioneTesto`, `prossimaAzioneData`, `idCv` stanno nel browser. Le candidature create altrove ricevono `fonte: ALTRO`. |
+| `GET /api/account/me` | **Collegato** | Include `linkedin` (stringa, assente se non c'è). Mancano `obiettivoSettimanale` e `sogliaAttesaGiorni`: stanno nel browser (predefiniti 10 e 14). |
+| `PUT`, `DELETE /api/account/me` | **Adattato** | Non esistono: il frontend usa `PUT /api/account/{id}` e `DELETE /api/account/delete/{id}`, con l'id preso dal `sub` del token. Il `PUT` manda sempre anche `linkedin` (`""` = rimuovi: un `PUT` senza il campo lo cancella). |
+| `GET`, `POST`, `PUT`, `DELETE /api/candidatura` | **Collegato in parte** | Il backend salva solo i campi base. `spontanea`, `fonte`, `prossimaAzioneTesto`, `prossimaAzioneData`, `idCv` stanno nel browser (`idCv` è l'id di un CV vero del server: se il CV non esiste più, il frontend lo azzera alla lettura dell'elenco dei CV). Le candidature create altrove ricevono `fonte: ALTRO`. |
 | `GET /api/candidatura/{id}/storico` | **Ricostruito nel browser** | Il frontend registra gli stati che vede: parte dallo stato attuale alla data di invio e aggiunge un evento alla data di oggi a ogni cambio. Lo storico di candidature già avanzate prima della prima apertura è quindi incompleto. |
 | `GET`, `POST /api/citta` | **Collegato** | |
-| colloqui, contatti, promemoria per azienda, CV, modelli, offerte | **Solo nel browser** | Nessun endpoint nel backend. |
+| `GET /api/cv`, `POST /api/cv`, `PUT /api/cv/{id}`, `GET /api/cv/{id}/file`, `DELETE /api/cv/{id}` | **Collegato** | Migrazione `V2__cv_e_linkedin.sql`. `POST`/`PUT` sono `multipart/form-data` (`nome`, `file`); solo PDF, DOC, DOCX, massimo 5 MB. Il file si scarica con una richiesta autenticata (Blob). `idCv` nelle candidature resta nel browser. Le vecchie versioni «con link» salvate nel browser vengono scartate: non si possono trasformare in file. |
+| colloqui, contatti, promemoria per azienda, modelli, offerte | **Solo nel browser** | Nessun endpoint nel backend. |
 
 ## 1. Da implementare per togliere il salvataggio nel browser
 
 | Voce | Cosa assume il frontend |
 |---|---|
 | `POST /api/auth/register`, `POST /api/auth/login` | Risposta `{ token, scadenza, account }`. Il login sbagliato risponde `401` con `detail`. La registrazione con email già usata risponde `409`. |
-| `GET`, `PUT`, `DELETE /api/account/me` | `PUT` accetta `{ nome, cognome, email, obiettivoSettimanale, sogliaAttesaGiorni, password? }`. La password è opzionale e, se c'è, ha almeno 8 caratteri. Non viene mai restituita. `DELETE` cancella anche tutti i dati dell'utente. Oggi nel backend esistono `/api/account/{id}`: servono le versioni `/me`. |
+| `GET`, `PUT`, `DELETE /api/account/me` | `PUT` accetta `{ nome, cognome, email, linkedin, obiettivoSettimanale, sogliaAttesaGiorni, password? }` (`linkedin` è già nel backend). La password è opzionale e, se c'è, ha almeno 8 caratteri. Non viene mai restituita. `DELETE` cancella anche tutti i dati dell'utente. Oggi nel backend esistono `/api/account/{id}`: servono le versioni `/me`. |
 | `GET /api/candidatura` | Tutte le candidature dell'utente, senza filtri né paginazione: il browser filtra e ordina. Ogni elemento ha anche `spontanea`, `fonte`, `prossimaAzioneTesto`, `prossimaAzioneData`, `idCv` e `citta` come oggetto completo. |
 | `POST /api/candidatura` | Non riceve `idAccount`: viene dal token. Il frontend non invia `id`, `idAccount` né `dataCreazione`. |
 | `GET /api/candidatura/{id}/storico` | `{ stato, dataEvento, nota }[]`. **Il primo evento deve essere `IN_FASE_DI_ATTESA` alla data di invio**, e un nuovo evento va creato a ogni cambio di stato fatto con `PUT`. `dataEvento` è una `LocalDate`. L'ordine non conta: il frontend riordina. |
@@ -29,7 +30,7 @@ Il mock (`src/app/core/mock/`) resta solo per i test e per lavorare senza backen
 | `GET`, `POST`, `PUT`, `DELETE /api/colloquio` | Vedi sezione 3. `PUT` e `DELETE` su `/api/colloquio/{id}`. |
 | `GET`, `POST`, `PUT`, `DELETE /api/contatto` | `{ id, nomeAzienda, nome, ruolo, email, linkedin, note }`. `PUT` e `DELETE` su `/{id}`. Stringhe vuote invece di `null` per i campi facoltativi. |
 | `GET`, `PUT /api/azienda/{nome}/promemoria` | `{ nonRicontattarePrimaDel: LocalDate | null }`. Il `GET` risponde `200` con `null`, non `404`, se il promemoria non c'è. Il nome va confrontato **ignorando maiuscole, accenti e spazi in eccesso** (lo stesso criterio di `normalizzaAzienda` in `src/app/core/azienda.ts`). |
-| `GET`, `POST`, `PUT`, `DELETE /api/cv` | `{ id, nome, url }`. `PUT` e `DELETE` su `/{id}`. Il frontend controlla che l'`url` sia vuoto oppure inizi con `http://` o `https://`. |
+| `GET`, `POST`, `PUT`, `DELETE /api/cv` | **Fatto** (vedi sezione 0): `{ id, nome, nomeFile, contentType, dimensione, dataCaricamento }`, file in `multipart/form-data`, download da `/api/cv/{id}/file`. |
 | `GET`, `POST`, `PUT`, `DELETE /api/modello` | `{ id, tipo, nome, testo }`. `PUT` e `DELETE` su `/{id}`. |
 | `GET`, `POST`, `PUT`, `DELETE /api/offerta` | Vedi sezione 3. `PUT` e `DELETE` su `/{id}`. |
 

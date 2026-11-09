@@ -2,7 +2,6 @@ import {
   Candidatura,
   Colloquio,
   Contatto,
-  Cv,
   Modello,
   Offerta,
   Promemoria,
@@ -32,14 +31,18 @@ export interface DatiLocali {
   storico: Record<number, StoricoEvento[]>;
   colloqui: Colloquio[];
   contatti: Contatto[];
-  cv: Cv[];
   modelli: Modello[];
   offerte: Offerta[];
   promemoria: Record<string, Promemoria>;
   prossimoId: number;
+  /**
+   * I CV ora stanno sul server. Dati salvati prima di questa modifica contengono le vecchie versioni
+   * «con link», che non si possono trasformare in file: all'apertura vengono scartate (vedi `senzaCvLocali`).
+   */
+  cvSuServer: boolean;
 }
 
-export type ChiaveRisorsa = 'colloqui' | 'contatti' | 'cv' | 'modelli' | 'offerte';
+export type ChiaveRisorsa = 'colloqui' | 'contatti' | 'modelli' | 'offerte';
 
 type Deposito = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
@@ -52,12 +55,22 @@ function vuoti(): DatiLocali {
     storico: {},
     colloqui: [],
     contatti: [],
-    cv: [],
     modelli: [],
     offerte: [],
     promemoria: {},
     prossimoId: 1,
+    cvSuServer: true,
   };
+}
+
+/**
+ * Toglie le vecchie versioni del CV salvate nel browser e scollega le candidature che le usavano:
+ * i loro numeri potrebbero coincidere con quelli di CV veri creati sul server.
+ */
+function senzaCvLocali(dati: Partial<DatiLocali> & { cv?: unknown }): Partial<DatiLocali> {
+  const { cv: _vecchi, ...resto } = dati;
+  const extra = Object.fromEntries(Object.entries(resto.extra ?? {}).map(([k, e]) => [k, { ...e, idCv: null }]));
+  return { ...resto, extra, cvSuServer: true };
 }
 
 export class ArchivioLocale {
@@ -66,7 +79,9 @@ export class ArchivioLocale {
   leggi(idAccount: number): DatiLocali {
     try {
       const grezzo = this.deposito.getItem(PREFISSO + idAccount);
-      return grezzo ? { ...vuoti(), ...(JSON.parse(grezzo) as Partial<DatiLocali>) } : vuoti();
+      if (!grezzo) return vuoti();
+      const salvati = JSON.parse(grezzo) as Partial<DatiLocali>;
+      return { ...vuoti(), ...(salvati.cvSuServer ? salvati : senzaCvLocali(salvati)) };
     } catch {
       // Contenuto illeggibile: si riparte da zero invece di bloccare l'app.
       return vuoti();
@@ -146,6 +161,18 @@ export class ArchivioLocale {
     d.storico = tieni(d.storico);
     d.colloqui = d.colloqui.filter((x) => presenti.has(x.idCandidatura));
     d.offerte = d.offerte.filter((x) => presenti.has(x.idCandidatura));
+  }
+
+  /**
+   * Le candidature che indicano una versione del CV non più esistente (eliminata da qui o da un altro
+   * browser) restano senza versione. `daScollegare` dice quali numeri non valgono più.
+   */
+  scollegaCv(idAccount: number, daScollegare: (idCv: number) => boolean): void {
+    const orfano = (e: ExtraCandidatura) => e.idCv !== null && daScollegare(e.idCv);
+    if (!Object.values(this.leggi(idAccount).extra).some(orfano)) return;
+    this.modifica(idAccount, (d) => {
+      for (const e of Object.values(d.extra)) if (orfano(e)) e.idCv = null;
+    });
   }
 
   // ---- risorse semplici ----

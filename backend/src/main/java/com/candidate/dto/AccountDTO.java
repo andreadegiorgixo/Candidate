@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.ToString;
@@ -33,6 +34,12 @@ public class AccountDTO {
     @ToString.Exclude
     @Size(min = 8, max = 72)
     private String password;
+
+    // facoltativo: vuoto oppure un indirizzo http(s) di linkedin.com (anche www. e sottodomini come it.linkedin.com)
+    @Size(max = 255)
+    @Pattern(regexp = "(?i)^\\s*(https?://([a-z0-9-]+\\.)*linkedin\\.com([/?#]\\S*)?)?\\s*$",
+        message = "Inserisci un indirizzo LinkedIn valido, ad esempio https://www.linkedin.com/in/nome-cognome")
+    private String linkedin;
 
     private LocalDate dataCreazione;
 }

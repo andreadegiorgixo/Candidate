@@ -9,6 +9,7 @@ import { Auth } from '../../core/auth/auth.service';
 import { CandidatureStore, StoricoStore } from '../../core/data/archivi';
 import { dettaglioConflitto, erroriCampo, messaggioErrore } from '../../core/errori';
 import { oggiISO } from '../../core/date';
+import { LINKEDIN_MESSAGGIO, LINKEDIN_PATTERN } from '../../core/linkedin';
 import { Notifier } from '../../core/notifier';
 import { Scheletro } from '../../shared/caricamento/caricamento';
 import { Testata } from '../../shared/testata/testata';
@@ -44,7 +45,10 @@ export class ProfiloPagina {
     nome: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     cognome: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    linkedin: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(255), Validators.pattern(LINKEDIN_PATTERN)] }),
   });
+
+  protected readonly linkedinMessaggio = LINKEDIN_MESSAGGIO;
 
   protected readonly preferenze = new FormGroup({
     obiettivoSettimanale: new FormControl(10, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(100)] }),
@@ -68,7 +72,7 @@ export class ProfiloPagina {
       const a = this.auth.account();
       if (!a) return;
       untracked(() => {
-        this.dati.reset({ nome: a.nome, cognome: a.cognome, email: a.email });
+        this.dati.reset({ nome: a.nome, cognome: a.cognome, email: a.email, linkedin: a.linkedin });
         this.preferenze.reset({ obiettivoSettimanale: a.obiettivoSettimanale, sogliaAttesaGiorni: a.sogliaAttesaGiorni });
       });
     });
@@ -85,6 +89,7 @@ export class ProfiloPagina {
         nome: a.nome,
         cognome: a.cognome,
         email: a.email,
+        linkedin: a.linkedin,
         obiettivoSettimanale: a.obiettivoSettimanale,
         sogliaAttesaGiorni: a.sogliaAttesaGiorni,
         ...parziale,
@@ -109,7 +114,7 @@ export class ProfiloPagina {
     if (this.dati.invalid) return void this.dati.markAllAsTouched();
     this.salvandoDati.set(true);
     const v = this.dati.getRawValue();
-    this.salva({ nome: v.nome.trim(), cognome: v.cognome.trim(), email: v.email.trim() }, () => this.salvandoDati.set(false), 'Dati salvati', this.dati);
+    this.salva({ nome: v.nome.trim(), cognome: v.cognome.trim(), email: v.email.trim(), linkedin: v.linkedin.trim() }, () => this.salvandoDati.set(false), 'Dati salvati', this.dati);
   }
 
   protected salvaPreferenze(): void {

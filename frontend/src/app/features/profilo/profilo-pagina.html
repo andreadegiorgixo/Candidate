@@ -30,6 +30,14 @@
             <mat-error>{{ dati.controls.email.getError('server') ?? 'Scrivi un’email valida, per esempio nome@esempio.it.' }}</mat-error>
           }
         </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Profilo LinkedIn</mat-label>
+          <input matInput type="url" formControlName="linkedin" placeholder="https://www.linkedin.com/in/nome-cognome" inputmode="url" autocomplete="url" />
+          <mat-hint>Facoltativo. Lo trovi anche in Materiali.</mat-hint>
+          @if (dati.controls.linkedin.invalid) {
+            <mat-error>{{ dati.controls.linkedin.getError('server') ?? linkedinMessaggio }}</mat-error>
+          }
+        </mat-form-field>
         <button type="submit" class="btn primario" [disabled]="salvandoDati() || dati.pristine">Salva dati</button>
       </form>
     </section>
@@ -83,7 +91,7 @@
 
     <section class="pann blocco" aria-labelledby="t-esporta">
       <h2 class="t" id="t-esporta">I tuoi dati</h2>
-      <p>Scarica tutto quello che hai salvato in un file: candidature con lo storico, colloqui, contatti, CV, modelli e proposte.</p>
+      <p>Scarica tutto quello che hai salvato in un file: candidature con lo storico, colloqui, contatti, l’elenco dei CV (senza i file), modelli e proposte.</p>
       <button type="button" class="btn" (click)="esporta()" [disabled]="esportando()">{{ esportando() ? 'Preparo il file' : 'Esporta tutti i dati' }}</button>
     </section>
 

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { conTipoCv } from '../cv-file';
 import {
   Account,
   AccountInput,
@@ -25,6 +26,16 @@ import {
   RegisterRequest,
   StoricoEvento,
 } from './models';
+
+function formCv(i: CvInput): FormData {
+  const form = new FormData();
+  form.append('nome', i.nome);
+  if (i.file) {
+    const file = conTipoCv(i.file);
+    form.append('file', file, file.name);
+  }
+  return form;
+}
 
 /** Unico punto in cui si conoscono gli URL del backend. */
 @Injectable({ providedIn: 'root' })
@@ -111,14 +122,19 @@ export class Api {
   cv(): Observable<Cv[]> {
     return this.http.get<Cv[]>(`${this.base}/cv`);
   }
+  /** Il CV viaggia come multipart: `nome` e, se c'è, `file`. */
   creaCv(i: CvInput): Observable<Cv> {
-    return this.http.post<Cv>(`${this.base}/cv`, i);
+    return this.http.post<Cv>(`${this.base}/cv`, formCv(i));
   }
   aggiornaCv(id: number, i: CvInput): Observable<Cv> {
-    return this.http.put<Cv>(`${this.base}/cv/${id}`, i);
+    return this.http.put<Cv>(`${this.base}/cv/${id}`, formCv(i));
   }
   eliminaCv(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/cv/${id}`);
+  }
+  /** Il file va scaricato con la richiesta (il token sta nell'header): un semplice link non basta. */
+  scaricaCv(id: number): Observable<Blob> {
+    return this.http.get(`${this.base}/cv/${id}/file`, { responseType: 'blob' });
   }
 
   modelli(): Observable<Modello[]> {

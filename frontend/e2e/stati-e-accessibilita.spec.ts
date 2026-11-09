@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { accedi, aspettaDati } from './aiuti';
 
-const PAGINE = ['/oggi', '/candidature', '/candidature?vista=bacheca', '/andamento', '/colloqui', '/aziende', '/materiali', '/offerte', '/profilo'];
+const PAGINE = ['/oggi', '/candidature', '/candidature?vista=bacheca', '/colloqui', '/aziende', '/materiali', '/offerte', '/profilo'];
 
 test.describe('stati di caricamento, errore e vuoto', () => {
   test('mentre i dati arrivano si vede lo scheletro, non una pagina vuota', async ({ page }) => {
@@ -12,7 +12,7 @@ test.describe('stati di caricamento, errore e vuoto', () => {
     await expect(page.getByRole('table')).toBeVisible({ timeout: 10_000 });
   });
 
-  for (const url of ['/oggi', '/candidature', '/andamento', '/colloqui', '/aziende', '/materiali', '/offerte']) {
+  for (const url of ['/oggi', '/candidature', '/colloqui', '/aziende', '/materiali', '/offerte']) {
     test(`${url}: se il server dà errore spiega cosa fare e «Riprova» funziona`, async ({ page }) => {
       await accedi(page);
       await page.evaluate(() => sessionStorage.setItem('candidate.mock.errore', '1'));
@@ -48,14 +48,13 @@ test.describe('stati di caricamento, errore e vuoto', () => {
     await expect(page).toHaveURL(/\/oggi/);
     const attesi: [string, string][] = [
       ['/candidature', 'Non hai ancora candidature'],
-      ['/andamento', 'Non c’è ancora niente da analizzare'],
       ['/colloqui', 'Non hai colloqui in programma'],
       ['/aziende', 'Non hai ancora aziende'],
       ['/materiali', 'Non hai ancora versioni del CV'],
       ['/offerte', 'Qui confronterai le proposte quando ne riceverai una.'],
     ];
     for (const [url, testo] of attesi) {
-      await page.getByRole('link', { name: new RegExp(`^${url === '/candidature' ? 'Candidature' : url === '/andamento' ? 'Andamento' : url === '/colloqui' ? 'Colloqui' : url === '/aziende' ? 'Aziende' : url === '/materiali' ? 'Materiali' : 'Offerte'}`) }).click();
+      await page.getByRole('link', { name: new RegExp(`^${url === '/candidature' ? 'Candidature' : url === '/colloqui' ? 'Colloqui' : url === '/aziende' ? 'Aziende' : url === '/materiali' ? 'Materiali' : 'Offerte'}`) }).click();
       await expect(page.getByText(testo).first()).toBeVisible();
     }
   });

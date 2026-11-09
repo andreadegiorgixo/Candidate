@@ -44,10 +44,6 @@ h2 {
     padding: 4px 6px 6px;
     margin: -4px -6px -6px;
 
-    &:hover {
-      background: var(--bosco-2);
-    }
-
     &:focus-visible {
       outline-color: var(--lime);
     }

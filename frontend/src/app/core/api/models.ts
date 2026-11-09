@@ -27,6 +27,8 @@ export interface Account {
   cognome: string;
   email: string;
   password?: string;
+  /** Link al profilo LinkedIn; stringa vuota se non c'è. */
+  linkedin: string;
   dataCreazione: string;
   obiettivoSettimanale: number;
   sogliaAttesaGiorni: number;
@@ -106,12 +108,22 @@ export interface Promemoria {
   nonRicontattarePrimaDel: string | null;
 }
 
+/** Versione del CV: i metadati del file caricato (il contenuto si scarica a parte). */
 export interface Cv {
   id: number;
   nome: string;
-  url: string;
+  nomeFile: string;
+  contentType: string;
+  /** In byte. */
+  dimensione: number;
+  /** Istante ISO 8601. */
+  dataCaricamento: string;
 }
-export type CvInput = Omit<Cv, 'id'>;
+/** Il file è obbligatorio in creazione; in modifica, se manca, resta quello attuale. */
+export interface CvInput {
+  nome: string;
+  file: File | null;
+}
 
 export type TipoModello = 'SOLLECITO' | 'RINGRAZIAMENTO' | 'SPONTANEA';
 
@@ -153,7 +165,7 @@ export interface RegisterRequest extends LoginRequest {
   cognome: string;
 }
 
-export type AccountInput = Pick<Account, 'nome' | 'cognome' | 'email' | 'obiettivoSettimanale' | 'sogliaAttesaGiorni'> & {
+export type AccountInput = Pick<Account, 'nome' | 'cognome' | 'email' | 'linkedin' | 'obiettivoSettimanale' | 'sogliaAttesaGiorni'> & {
   password?: string;
 };
 

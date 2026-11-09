@@ -97,31 +97,31 @@ describe('interceptor del backend', () => {
 
     it('PUT /account/me diventa PUT /account/{id} senza i campi sconosciuti al backend', async () => {
       const p = firstValueFrom(
-        http.put<Account>('/api/account/me', { nome: 'Ada', cognome: 'L', email: 'a@b.it', obiettivoSettimanale: 6, sogliaAttesaGiorni: 10, password: '' }, { headers: BEARER }),
+        http.put<Account>('/api/account/me', { nome: 'Ada', cognome: 'L', email: 'a@b.it', linkedin: 'https://it.linkedin.com/in/ada', obiettivoSettimanale: 6, sogliaAttesaGiorni: 10, password: '' }, { headers: BEARER }),
       );
       const r = rete.expectOne('/api/account/7');
       expect(r.request.method).toBe('PUT');
-      expect(r.request.body).toEqual({ nome: 'Ada', cognome: 'L', email: 'a@b.it' });
-      r.flush({ id: 7, nome: 'Ada', cognome: 'L', email: 'a@b.it', dataCreazione: '2026-11-03' });
-      expect(await p).toMatchObject({ obiettivoSettimanale: 6, sogliaAttesaGiorni: 10 });
+      expect(r.request.body).toEqual({ nome: 'Ada', cognome: 'L', email: 'a@b.it', linkedin: 'https://it.linkedin.com/in/ada' });
+      r.flush({ id: 7, nome: 'Ada', cognome: 'L', email: 'a@b.it', linkedin: 'https://it.linkedin.com/in/ada', dataCreazione: '2026-11-03' });
+      expect(await p).toMatchObject({ obiettivoSettimanale: 6, sogliaAttesaGiorni: 10, linkedin: 'https://it.linkedin.com/in/ada' });
       expect(archivio.impostazioni(7)).toEqual({ obiettivoSettimanale: 6, sogliaAttesaGiorni: 10 });
     });
 
     it('se il salvataggio fallisce le impostazioni non cambiano', async () => {
-      const p = firstValueFrom(http.put('/api/account/me', { nome: 'A', cognome: 'B', email: 'x', obiettivoSettimanale: 1, sogliaAttesaGiorni: 1 }, { headers: BEARER }));
+      const p = firstValueFrom(http.put('/api/account/me', { nome: 'A', cognome: 'B', email: 'x', linkedin: '', obiettivoSettimanale: 1, sogliaAttesaGiorni: 1 }, { headers: BEARER }));
       rete.expectOne('/api/account/7').flush({ detail: 'x' }, { status: 409, statusText: 'Conflict' });
       await p.catch(() => undefined);
       expect(archivio.impostazioni(7).obiettivoSettimanale).toBe(10);
     });
 
     it('DELETE /account/me diventa DELETE /account/delete/{id} e cancella i dati locali', async () => {
-      archivio.crea(7, 'cv', { nome: 'CV', url: 'https://x.it' });
+      archivio.crea(7, 'modelli', { tipo: 'SOLLECITO', nome: 'A', testo: 't' });
       const p = firstValueFrom(http.delete<void>('/api/account/me', { headers: BEARER }));
       const r = rete.expectOne('/api/account/delete/7');
       expect(r.request.method).toBe('DELETE');
       r.flush(null, { status: 204, statusText: 'No Content' });
       await p;
-      expect(archivio.elenco(7, 'cv')).toEqual([]);
+      expect(archivio.elenco(7, 'modelli')).toEqual([]);
     });
   });
 
@@ -193,7 +193,7 @@ describe('interceptor del backend', () => {
     });
 
     it('rispondono 404 per un elemento che non c’è', async () => {
-      const e = (await firstValueFrom(http.put('/api/cv/99', { nome: 'x', url: 'y' }, { headers: BEARER })).catch((x: unknown) => x)) as HttpErrorResponse;
+      const e = (await firstValueFrom(http.put('/api/colloquio/99', { ...colloquio({ idCandidatura: 3 }) }, { headers: BEARER })).catch((x: unknown) => x)) as HttpErrorResponse;
       expect(e.status).toBe(404);
     });
 
@@ -206,6 +206,51 @@ describe('interceptor del backend', () => {
       await firstValueFrom(http.put('/api/azienda/Acm%C3%A9%20Italia/promemoria', { nonRicontattarePrimaDel: '2026-12-01' }, { headers: BEARER }));
       const p = await firstValueFrom(http.get<{ nonRicontattarePrimaDel: string | null }>('/api/azienda/ACME%20italia/promemoria', { headers: BEARER }));
       expect(p.nonRicontattarePrimaDel).toBe('2026-12-01');
+    });
+  });
+
+  describe('CV (file sul server)', () => {
+    const cv = (id: number) => ({ id, nome: `CV ${id}`, nomeFile: 'cv.pdf', contentType: 'application/pdf', dimensione: 10, dataCaricamento: '2026-11-01T10:00:00Z' });
+    const conIdCv = (idCv: number | null) => ({ spontanea: false, fonte: 'ALTRO' as const, prossimaAzioneTesto: null, prossimaAzioneData: null, idCv });
+
+    it('GET /cv va al backend e scollega le candidature che puntano a versioni sparite', async () => {
+      archivio.salvaCandidatura(7, rispostaBackend(1) as never, conIdCv(2), '2026-10-01');
+      archivio.salvaCandidatura(7, rispostaBackend(2) as never, conIdCv(9), '2026-10-01');
+      const p = firstValueFrom(http.get('/api/cv', { headers: BEARER }));
+      rete.expectOne('/api/cv').flush([cv(2)]);
+      expect(await p).toEqual([cv(2)]);
+      expect(archivio.leggi(7).extra[1].idCv).toBe(2);
+      expect(archivio.leggi(7).extra[2].idCv).toBeNull();
+    });
+
+    it('POST manda il FormData così com’è', async () => {
+      const form = new FormData();
+      form.append('nome', 'CV');
+      form.append('file', new File(['%PDF'], 'cv.pdf', { type: 'application/pdf' }));
+      const p = firstValueFrom(http.post('/api/cv', form, { headers: BEARER }));
+      const r = rete.expectOne('/api/cv');
+      expect(r.request.body).toBe(form);
+      r.flush(cv(5), { status: 201, statusText: 'Created' });
+      expect(await p).toEqual(cv(5));
+    });
+
+    it('DELETE scollega dalle candidature la versione eliminata, ma solo se il server ha risposto bene', async () => {
+      archivio.salvaCandidatura(7, rispostaBackend(1) as never, conIdCv(2), '2026-10-01');
+      const fallita = firstValueFrom(http.delete('/api/cv/2', { headers: BEARER }));
+      rete.expectOne('/api/cv/2').flush({ detail: 'x' }, { status: 500, statusText: 'Server Error' });
+      await fallita.catch(() => undefined);
+      expect(archivio.leggi(7).extra[1].idCv).toBe(2);
+
+      const riuscita = firstValueFrom(http.delete('/api/cv/2', { headers: BEARER }));
+      rete.expectOne('/api/cv/2').flush(null, { status: 204, statusText: 'No Content' });
+      await riuscita;
+      expect(archivio.leggi(7).extra[1].idCv).toBeNull();
+    });
+
+    it('senza token non si risponde dal browser: la richiesta va al backend, che dà 401', async () => {
+      const p = firstValueFrom(http.get('/api/cv')).catch((x: unknown) => x);
+      rete.expectOne('/api/cv').flush({ detail: 'x' }, { status: 401, statusText: 'Unauthorized' });
+      expect(((await p) as HttpErrorResponse).status).toBe(401);
     });
   });
 

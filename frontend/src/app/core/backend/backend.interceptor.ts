@@ -1,6 +1,6 @@
 import { HttpErrorResponse, HttpEvent, HttpInterceptorFn, HttpRequest, HttpResponse } from '@angular/common/http';
 import { map, Observable, of, OperatorFunction, tap, throwError } from 'rxjs';
-import { Account, AccountInput, AuthResponse, Candidatura, CandidaturaInput, Promemoria } from '../api/models';
+import { Account, AccountInput, AuthResponse, Candidatura, CandidaturaInput, Cv, Promemoria } from '../api/models';
 import { oggiISO } from '../date';
 import {
   aAccountDTO,
@@ -22,6 +22,7 @@ type CandidatureDTO = components['schemas']['CandidatureDTO'];
  *  1. traduce richieste e risposte quando il contratto del backend è diverso (`adattatore.ts`);
  *  2. riscrive gli URL che nel backend hanno un'altra forma (`/account/me` → `/account/{id}`);
  *  3. risponde da solo alle risorse che il backend non ha ancora, salvandole nel browser (`archivio-locale.ts`).
+ * I CV (file) e il link LinkedIn dell'account sono ormai sul server: le richieste passano così come sono.
  * Quando il backend avrà un endpoint nuovo, basta togliere il ramo corrispondente.
  */
 
@@ -39,7 +40,6 @@ export function impostaArchivioLocale(a: ArchivioLocale | null): void {
 const RISORSE: Record<string, ChiaveRisorsa> = {
   colloquio: 'colloqui',
   contatto: 'contatti',
-  cv: 'cv',
   modello: 'modelli',
   offerta: 'offerte',
 };
@@ -81,7 +81,7 @@ export const backendInterceptor: HttpInterceptorFn = (req, next) => {
 
   // Senza un token valido il backend risponde 401 da solo; le risorse locali lo imitano.
   if (id === null) {
-    const locale = /^\/(colloquio|contatto|cv|modello|offerta|azienda)(\/|$)/.test(percorso);
+    const locale = /^\/(colloquio|contatto|modello|offerta|azienda)(\/|$)/.test(percorso);
     return locale ? errore(req, 401, 'Sessione scaduta') : next(req);
   }
 
@@ -150,8 +150,24 @@ export const backendInterceptor: HttpInterceptorFn = (req, next) => {
     );
   }
 
+  // ---- CV: file sul server; qui si tengono allineati gli `idCv` salvati nel browser ----
+  if (percorso === '/cv' && metodo === 'GET') {
+    return next(req).pipe(
+      conCorpo<Cv[], Cv[]>((lista) => {
+        const presenti = new Set(lista.map((c) => c.id));
+        arch.scollegaCv(id, (idCv) => !presenti.has(idCv));
+        return lista;
+      }),
+    );
+  }
+  r = /^\/cv\/(\d+)$/.exec(percorso);
+  if (r && metodo === 'DELETE') {
+    const idCv = Number(r[1]);
+    return next(req).pipe(dopoSuccesso(() => arch.scollegaCv(id, (x) => x === idCv)));
+  }
+
   // ---- risorse che il backend non ha: restano nel browser ----
-  r = /^\/(colloquio|contatto|cv|modello|offerta)(?:\/(\d+))?$/.exec(percorso);
+  r = /^\/(colloquio|contatto|modello|offerta)(?:\/(\d+))?$/.exec(percorso);
   if (r) {
     const chiave = RISORSE[r[1]];
     const idR = r[2] ? Number(r[2]) : null;

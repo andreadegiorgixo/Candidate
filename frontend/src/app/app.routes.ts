@@ -13,7 +13,8 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'oggi' },
       { path: 'oggi', loadComponent: () => import('./features/oggi/oggi-pagina').then((m) => m.OggiPagina), title: 'Oggi' },
-      { path: 'andamento', loadChildren: () => import('./features/andamento/andamento.routes').then((m) => m.ANDAMENTO_ROUTES) },
+      // Andamento è confluito in Oggi: i vecchi link portano lì.
+      { path: 'andamento', redirectTo: 'oggi' },
       { path: 'colloqui', loadChildren: () => import('./features/colloqui/colloqui.routes').then((m) => m.COLLOQUI_ROUTES) },
       { path: 'aziende', loadChildren: () => import('./features/aziende/aziende.routes').then((m) => m.AZIENDE_ROUTES) },
       { path: 'materiali', loadChildren: () => import('./features/materiali/materiali.routes').then((m) => m.MATERIALI_ROUTES) },

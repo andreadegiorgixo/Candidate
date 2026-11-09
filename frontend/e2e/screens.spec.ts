@@ -49,7 +49,6 @@ const SCHERMATE: Schermata[] = [
       await page.waitForTimeout(400);
     },
   },
-  { nome: 'andamento', fase: '2', url: '/andamento', voce: 'Andamento' },
   { nome: 'colloqui', fase: '3', url: '/colloqui', voce: 'Colloqui' },
   {
     nome: 'colloqui-conclusi',

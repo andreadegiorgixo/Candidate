@@ -16,27 +16,175 @@ test.describe('Materiali', () => {
     await expect(page.getByText(/Tasso di risposta \d+%/).first()).toBeVisible();
   });
 
-  test('si aggiunge una versione del CV', async ({ page }) => {
+  test('ogni versione mostra nome del file, dimensione e data di caricamento', async ({ page }) => {
+    await accedi(page, '/materiali');
+    await aspettaDati(page);
+    await expect(page.getByText(/elisa-marchetti-cv-java\.pdf · 209 KB · caricato il \d{1,2} \w+ \d{4}/)).toBeVisible();
+  });
+
+  test('si carica una versione del CV scegliendo un file dal computer', async ({ page }) => {
     await accedi(page, '/materiali');
     await aspettaDati(page);
     await page.getByRole('button', { name: 'Aggiungi versione' }).click();
     const d = page.getByRole('dialog');
     await d.getByLabel('Nome', { exact: true }).fill('CV in inglese');
-    await d.getByLabel('Link al file').fill('https://esempio.it/cv-en.pdf');
+    await d.locator('input[type=file]').setInputFiles({ name: 'cv-en.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 inglese') });
+    await expect(d.getByText('cv-en.pdf')).toBeVisible();
+    await expect(d.getByText('16 byte')).toBeVisible();
     await d.getByRole('button', { name: 'Salva versione' }).click();
     await expect(page.getByText('CV in inglese')).toBeVisible();
+    await expect(page.getByText(/cv-en\.pdf · 16 byte/)).toBeVisible();
     await expect(page.getByText('Non l’hai ancora usata per nessuna candidatura.')).toBeVisible();
   });
 
-  test('un link non valido spiega come correggerlo', async ({ page }) => {
+  test('il file si può anche trascinare sul riquadro', async ({ page }) => {
+    await accedi(page, '/materiali');
+    await aspettaDati(page);
+    await page.getByRole('button', { name: 'Aggiungi versione' }).click();
+    const d = page.getByRole('dialog');
+    const dati = await page.evaluateHandle(() => {
+      const dt = new DataTransfer();
+      dt.items.add(new File(['%PDF-1.4'], 'trascinato.pdf', { type: 'application/pdf' }));
+      return dt;
+    });
+    await d.locator('.zona').dispatchEvent('drop', { dataTransfer: dati });
+    await expect(d.getByText('trascinato.pdf')).toBeVisible();
+  });
+
+  test('senza file, o con un file non ammesso o troppo grande, spiega cosa fare', async ({ page }) => {
     await accedi(page, '/materiali');
     await aspettaDati(page);
     await page.getByRole('button', { name: 'Aggiungi versione' }).click();
     const d = page.getByRole('dialog');
     await d.getByLabel('Nome', { exact: true }).fill('X');
-    await d.getByLabel('Link al file').fill('non-un-link');
     await d.getByRole('button', { name: 'Salva versione' }).click();
-    await expect(d.getByText('Scrivi un link che inizi con http:// o https://.')).toBeVisible();
+    await expect(d.getByText('Scegli il file del tuo CV.')).toBeVisible();
+
+    const campo = d.locator('input[type=file]');
+    await campo.setInputFiles({ name: 'note.txt', mimeType: 'text/plain', buffer: Buffer.from('ciao') });
+    await expect(d.getByText('Questo formato non è ammesso. Scegli un file PDF, DOC o DOCX.')).toBeVisible();
+
+    await campo.setInputFiles({ name: 'enorme.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(6 * 1024 * 1024) });
+    await expect(d.getByText('Il file pesa 6 MB: il massimo è 5 MB.')).toBeVisible();
+
+    // nessun file valido è stato scelto: la versione non si salva
+    await d.getByRole('button', { name: 'Salva versione' }).click();
+    await expect(d).toBeVisible();
+    await expect(page.getByText('Versione del CV salvata')).toHaveCount(0);
+  });
+
+  test('in modifica il file è facoltativo: cambia il nome e resta quello attuale', async ({ page }) => {
+    await accedi(page, '/materiali');
+    await aspettaDati(page);
+    await page.getByRole('button', { name: 'Modifica' }).first().click();
+    const d = page.getByRole('dialog');
+    await expect(d.getByText('elisa-marchetti-cv.pdf')).toBeVisible();
+    await expect(d.getByText('Se non ne scegli un altro, resta quello attuale.')).toBeVisible();
+    await d.getByLabel('Nome', { exact: true }).fill('CV generale 2026');
+    await d.getByRole('button', { name: 'Salva versione' }).click();
+    await expect(page.getByText('CV generale 2026')).toBeVisible();
+    await expect(page.getByText(/elisa-marchetti-cv\.pdf · 184 KB/)).toBeVisible();
+  });
+
+  test('in modifica si può sostituire il file', async ({ page }) => {
+    await accedi(page, '/materiali');
+    await aspettaDati(page);
+    await page.getByRole('button', { name: 'Modifica' }).first().click();
+    const d = page.getByRole('dialog');
+    await d.locator('input[type=file]').setInputFiles({ name: 'nuovo.docx', mimeType: '', buffer: Buffer.from('PK') });
+    await d.getByRole('button', { name: 'Salva versione' }).click();
+    await expect(page.getByText(/nuovo\.docx · 2 byte/)).toBeVisible();
+  });
+
+  test('«Scarica» salva il file col suo nome', async ({ page }) => {
+    await accedi(page, '/materiali');
+    await aspettaDati(page);
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Scarica CV generale' }).click();
+    const file = await download;
+    expect(file.suggestedFilename()).toBe('elisa-marchetti-cv.pdf');
+    expect((await import('node:fs')).readFileSync((await file.path())!, 'utf8')).toContain('%PDF');
+  });
+
+  test('un file caricato si scarica identico', async ({ page }) => {
+    await accedi(page, '/materiali');
+    await aspettaDati(page);
+    await page.getByRole('button', { name: 'Aggiungi versione' }).click();
+    const d = page.getByRole('dialog');
+    await d.getByLabel('Nome', { exact: true }).fill('Prova');
+    await d.locator('input[type=file]').setInputFiles({ name: 'prova.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 contenuto di prova') });
+    await d.getByRole('button', { name: 'Salva versione' }).click();
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Scarica Prova' }).click();
+    const file = await download;
+    expect(file.suggestedFilename()).toBe('prova.pdf');
+    expect((await import('node:fs')).readFileSync((await file.path())!, 'utf8')).toBe('%PDF-1.4 contenuto di prova');
+  });
+
+  test('si elimina una versione', async ({ page }) => {
+    await accedi(page, '/materiali');
+    await aspettaDati(page);
+    await page.getByRole('button', { name: 'Elimina' }).first().click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Elimina versione' }).click();
+    await expect(page.getByText('Versione eliminata')).toBeVisible();
+    await expect(page.getByText('CV generale', { exact: true })).toHaveCount(0);
+  });
+
+  test.describe('profilo LinkedIn', () => {
+    test.beforeEach(async ({ page }) => {
+      await accedi(page, '/materiali');
+      await aspettaDati(page);
+    });
+
+    test('si aggiunge, compare come link che apre in una nuova scheda, si modifica e si rimuove', async ({ page }) => {
+      const blocco = page.getByRole('region', { name: 'Profilo LinkedIn' });
+      await expect(blocco.getByText('Non hai ancora indicato il tuo profilo.')).toBeVisible();
+      await blocco.getByRole('button', { name: 'Aggiungi il link' }).click();
+      await blocco.getByLabel('Link al tuo profilo LinkedIn').fill('https://www.linkedin.com/in/elisa-marchetti');
+      await blocco.getByRole('button', { name: 'Salva link' }).click();
+      await expect(page.getByText('Link LinkedIn salvato')).toBeVisible();
+      const link = blocco.getByRole('link', { name: 'https://www.linkedin.com/in/elisa-marchetti' });
+      await expect(link).toHaveAttribute('href', 'https://www.linkedin.com/in/elisa-marchetti');
+      await expect(link).toHaveAttribute('target', '_blank');
+      await expect(link).toHaveAttribute('rel', /noopener/);
+
+      await blocco.getByRole('button', { name: 'Modifica' }).click();
+      await expect(blocco.getByLabel('Link al tuo profilo LinkedIn')).toHaveValue('https://www.linkedin.com/in/elisa-marchetti');
+      await blocco.getByLabel('Link al tuo profilo LinkedIn').fill('https://it.linkedin.com/in/elisa');
+      await blocco.getByRole('button', { name: 'Salva link' }).click();
+      await expect(blocco.getByRole('link', { name: 'https://it.linkedin.com/in/elisa' })).toBeVisible();
+
+      await blocco.getByRole('button', { name: 'Rimuovi' }).click();
+      await expect(page.getByText('Link LinkedIn rimosso')).toBeVisible();
+      await expect(blocco.getByText('Non hai ancora indicato il tuo profilo.')).toBeVisible();
+    });
+
+    test('un indirizzo che non è di LinkedIn spiega come correggerlo', async ({ page }) => {
+      const blocco = page.getByRole('region', { name: 'Profilo LinkedIn' });
+      await blocco.getByRole('button', { name: 'Aggiungi il link' }).click();
+      await blocco.getByLabel('Link al tuo profilo LinkedIn').fill('https://example.com/elisa');
+      await blocco.getByRole('button', { name: 'Salva link' }).click();
+      await expect(blocco.getByText(/Scrivi un indirizzo LinkedIn valido/)).toBeVisible();
+    });
+
+    test('il link si vede e si modifica anche nel profilo', async ({ page }) => {
+      const blocco = page.getByRole('region', { name: 'Profilo LinkedIn' });
+      await blocco.getByRole('button', { name: 'Aggiungi il link' }).click();
+      await blocco.getByLabel('Link al tuo profilo LinkedIn').fill('https://www.linkedin.com/in/elisa');
+      await blocco.getByRole('button', { name: 'Salva link' }).click();
+      await expect(page.getByText('Link LinkedIn salvato')).toBeVisible();
+
+      await page.getByRole('link', { name: /^Profilo/ }).click();
+      await expect(page).toHaveURL(/\/profilo/);
+      const campo = page.getByRole('textbox', { name: 'Profilo LinkedIn' });
+      await expect(campo).toHaveValue('https://www.linkedin.com/in/elisa');
+      await campo.fill('https://www.linkedin.com/in/elisa-m');
+      await page.getByRole('button', { name: 'Salva dati' }).click();
+      await expect(page.getByText('Dati salvati')).toBeVisible();
+
+      await page.getByRole('link', { name: /^Materiali/ }).click();
+      await expect(page.getByRole('link', { name: 'https://www.linkedin.com/in/elisa-m' })).toBeVisible();
+    });
   });
 
   test('i modelli si copiano e si modificano', async ({ page, context }) => {

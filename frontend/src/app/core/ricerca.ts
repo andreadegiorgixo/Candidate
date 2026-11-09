@@ -25,7 +25,6 @@ export const AZIONI: readonly Azione[] = [
   { titolo: 'Aggiungi candidatura', dettaglio: 'Apre il pannello di aggiunta rapida', parole: 'nuova aggiungi crea inserisci candidatura', comando: 'nuova-candidatura' },
   { titolo: 'Vai a Oggi', dettaglio: 'Cosa fare adesso', parole: 'oggi da fare home', percorso: ['/oggi'] },
   { titolo: 'Vai a Candidature', dettaglio: 'Elenco e bacheca', parole: 'candidature elenco bacheca', percorso: ['/candidature'] },
-  { titolo: 'Vai ad Andamento', dettaglio: 'Come sta andando la ricerca', parole: 'andamento grafici statistiche', percorso: ['/andamento'] },
   { titolo: 'Vai a Colloqui', dettaglio: 'Agenda, resoconti e domande', parole: 'colloqui agenda domande', percorso: ['/colloqui'] },
   { titolo: 'Vai ad Aziende', dettaglio: 'Le aziende a cui hai scritto', parole: 'aziende', percorso: ['/aziende'] },
   { titolo: 'Vai a Materiali', dettaglio: 'CV e modelli di messaggio', parole: 'materiali cv curriculum modelli messaggi', percorso: ['/materiali'] },

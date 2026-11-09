@@ -27,6 +27,9 @@ public class Account {
     @Column (name = "PASSWORD", nullable = false)
     private String password;
 
+    @Column (name = "LINKEDIN")
+    private String linkedin;
+
     @Column (name = "DATA_CREAZIONE", nullable = false)
     private LocalDate dataCreazione;
 
@@ -91,6 +94,14 @@ public class Account {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getLinkedin() {
+        return linkedin;
+    }
+
+    public void setLinkedin(String linkedin) {
+        this.linkedin = linkedin;
     }
 
     public LocalDate getDataCreazione() {

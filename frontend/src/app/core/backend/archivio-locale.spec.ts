@@ -43,14 +43,46 @@ describe('archivio locale', () => {
   });
 
   it('tiene separati gli account e sopravvive a una nuova istanza', () => {
-    a.crea(1, 'cv', { nome: 'CV 2026', url: 'https://x.it' });
-    expect(a.elenco(2, 'cv')).toEqual([]);
-    expect(new ArchivioLocale(deposito).elenco(1, 'cv')).toHaveLength(1);
+    a.crea(1, 'modelli', { tipo: 'SOLLECITO', nome: 'A', testo: 't' });
+    expect(a.elenco(2, 'modelli')).toEqual([]);
+    expect(new ArchivioLocale(deposito).elenco(1, 'modelli')).toHaveLength(1);
+  });
+
+  describe('CV salvati nel browser prima che i file stessero sul server', () => {
+    const extra = (idCv: number | null) => ({ spontanea: false, fonte: 'ALTRO' as const, prossimaAzioneTesto: null, prossimaAzioneData: null, idCv });
+
+    it('le vecchie versioni «con link» vengono scartate e le candidature restano senza versione', () => {
+      deposito.setItem(
+        'candidate.locale.1',
+        JSON.stringify({ cv: [{ id: 2, nome: 'Vecchio', url: 'https://x.it' }], extra: { 5: extra(2), 6: extra(null) }, modelli: [{ id: 9, tipo: 'SOLLECITO', nome: 'M', testo: 't' }], prossimoId: 10 }),
+      );
+      const dati = a.leggi(1);
+      expect(dati).not.toHaveProperty('cv');
+      expect(dati.extra[5].idCv).toBeNull();
+      expect(dati.extra[6].idCv).toBeNull();
+      // il resto non si tocca
+      expect(a.elenco(1, 'modelli')).toHaveLength(1);
+      expect(dati.prossimoId).toBe(10);
+    });
+
+    it('dopo la prima scrittura il marcatore resta e i nuovi idCv non vengono più azzerati', () => {
+      deposito.setItem('candidate.locale.1', JSON.stringify({ cv: [{ id: 2, nome: 'Vecchio', url: 'u' }], extra: { 5: extra(2) } }));
+      a.crea(1, 'modelli', { tipo: 'SOLLECITO', nome: 'A', testo: 't' });
+      expect(JSON.parse(deposito.getItem('candidate.locale.1')!)).not.toHaveProperty('cv');
+      a.modifica(1, (d) => void (d.extra[5].idCv = 2));
+      expect(new ArchivioLocale(deposito).leggi(1).extra[5].idCv).toBe(2);
+    });
+
+    it('scollegaCv toglie la versione solo dalle candidature che puntano a numeri non più validi', () => {
+      a.modifica(1, (d) => void (d.extra = { 1: extra(3), 2: extra(4), 3: extra(null) }));
+      a.scollegaCv(1, (id) => id !== 4);
+      expect(Object.values(a.leggi(1).extra).map((e) => e.idCv)).toEqual([null, 4, null]);
+    });
   });
 
   it('riparte da zero se il contenuto salvato è illeggibile', () => {
     deposito.setItem('candidate.locale.1', '{non json');
-    expect(a.elenco(1, 'cv')).toEqual([]);
+    expect(a.elenco(1, 'modelli')).toEqual([]);
     expect(a.impostazioni(1)).toEqual({ obiettivoSettimanale: 10, sogliaAttesaGiorni: 14 });
   });
 

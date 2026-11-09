@@ -1,17 +1,55 @@
-<app-testata titolo="Materiali" sottotitolo="Le versioni del tuo CV e i messaggi che usi più spesso." />
+<app-testata titolo="Materiali" sottotitolo="Il tuo profilo LinkedIn, le versioni del CV e i messaggi che usi più spesso." />
 
 @switch (stato()) {
   @case ('errore') {
     <app-errore-caricamento [errore]="errore()" (riprova)="ricarica()" />
   }
   @case ('pronto') {
+    @if (auth.account(); as account) {
+      <section class="blocco" aria-labelledby="t-linkedin">
+        <div class="intesta">
+          <h2 class="t" id="t-linkedin">Profilo LinkedIn</h2>
+        </div>
+        <div class="pann linkedin">
+          @if (modificaLinkedinAperta()) {
+            <form [formGroup]="linkedinForm" (ngSubmit)="salvaLinkedin()" novalidate>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Link al tuo profilo LinkedIn</mat-label>
+                <input matInput type="url" formControlName="linkedin" placeholder="https://www.linkedin.com/in/nome-cognome" inputmode="url" autocomplete="url" />
+                @if (linkedinForm.controls.linkedin.invalid) {
+                  <mat-error>{{ linkedinForm.controls.linkedin.getError('server') ?? linkedinMessaggio }}</mat-error>
+                }
+              </mat-form-field>
+              <div class="az">
+                <button type="submit" class="btn primario" [disabled]="salvandoLinkedin()">Salva link</button>
+                <button type="button" class="btn" (click)="annullaLinkedin()">Annulla</button>
+              </div>
+            </form>
+          } @else if (account.linkedin) {
+            <div class="link-linkedin">
+              <a [href]="account.linkedin" target="_blank" rel="noopener noreferrer"><app-icona nome="link" /> {{ account.linkedin }}</a>
+              <div class="az">
+                <button type="button" class="btn piccolo" (click)="apriLinkedin(account.linkedin)">Modifica</button>
+                <button type="button" class="btn piccolo pericolo" (click)="rimuoviLinkedin()" [disabled]="salvandoLinkedin()">Rimuovi</button>
+              </div>
+            </div>
+          } @else {
+            <div class="link-linkedin">
+              <p class="tenue">Non hai ancora indicato il tuo profilo. Lo ritrovi qui, a portata di mano, quando scrivi a un recruiter.</p>
+              <button type="button" class="btn piccolo" (click)="apriLinkedin('')"><app-icona nome="piu" /> Aggiungi il link</button>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
     <section class="blocco" aria-labelledby="t-cv">
       <div class="intesta">
         <h2 class="t" id="t-cv">Versioni del CV</h2>
         <button type="button" class="btn piccolo" (click)="nuovoCv()"><app-icona nome="piu" /> Aggiungi versione</button>
       </div>
       @if (cv().length === 0) {
-        <app-stato-vuoto titolo="Non hai ancora versioni del CV" testo="Aggiungi il link a ogni versione che usi: poi vedrai quale riceve più risposte.">
+        <app-stato-vuoto titolo="Non hai ancora versioni del CV" testo="Carica il file (PDF, DOC o DOCX) di ogni versione che usi: poi vedrai quale riceve più risposte.">
           <button type="button" class="btn primario" (click)="nuovoCv()">Aggiungi la prima versione</button>
         </app-stato-vuoto>
       } @else {
@@ -20,11 +58,7 @@
             <li class="riga">
               <div>
                 <strong>{{ r.cv.nome }}</strong>
-                @if (r.cv.url) {
-                  <small><a [href]="r.cv.url" target="_blank" rel="noopener noreferrer">{{ r.cv.url }}</a></small>
-                } @else {
-                  <small>Nessun link salvato</small>
-                }
+                <small>{{ r.cv.nomeFile }} · {{ dimensione(r.cv.dimensione) }} · caricato il {{ dataCaricamento(r.cv) }}</small>
                 <p class="stat">
                   @if (r.n === 0) {
                     <span class="tenue">Non l’hai ancora usata per nessuna candidatura.</span>
@@ -40,6 +74,9 @@
                 </p>
               </div>
               <div class="az">
+                <button type="button" class="btn piccolo" (click)="scarica(r.cv)" [disabled]="scaricandoId() === r.cv.id" [attr.aria-label]="'Scarica ' + r.cv.nome">
+                  <app-icona nome="esporta" /> {{ scaricandoId() === r.cv.id ? 'Scarico' : 'Scarica' }}
+                </button>
                 <button type="button" class="btn piccolo" (click)="modificaCv(r.cv)">Modifica</button>
                 <button type="button" class="btn piccolo pericolo" (click)="eliminaCv(r.cv, r.n)">Elimina</button>
               </div>
