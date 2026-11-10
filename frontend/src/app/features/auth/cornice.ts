@@ -7,7 +7,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   template: `
     <div class="pagina">
       <aside class="marchio" aria-hidden="true">
-        <p class="logo"><i></i>Candidate</p>
+        <p class="logo"><i></i>Applify</p>
         <div class="testo">
           <p class="frase">Sai sempre a che punto sei.</p>
           <ol class="linea">

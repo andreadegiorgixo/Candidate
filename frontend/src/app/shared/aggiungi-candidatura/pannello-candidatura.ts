@@ -48,8 +48,7 @@ import { Icona } from '../icona/icona';
     }
     h2 {
       font-size: 22px;
-      font-weight: 800;
-      font-stretch: 112%;
+      font-weight: 650;
     }
     mat-dialog-content {
       flex: 1;

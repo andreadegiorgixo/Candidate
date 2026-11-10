@@ -1,41 +1,57 @@
 :root {
-  --bosco: #092d0b;
-  --bosco-2: #173814;
-  --lime: #cbf949;
-  --avorio: #f9f9ef;
-  --sabbia: #ebebdd;
-  --bordo: #dedfcf;
+  --bosco: #073b28;
+  --bosco-2: #0b5138;
+  --lime: #38b982;
+  --avorio: #f7faf8;
+  --sabbia: #eef5f0;
+  --bordo: #e2eae4;
   --bianco: #ffffff;
-  --testo-2: #565e50;
-  --verde-testo: #3f6f20;
-  --errore: #b3261e;
+  --testo-2: #5f6e66;
+  --verde-testo: #13764f;
+  --errore: #b42318;
+
+  --testo: #142b20;
+  /* Solo placeholder, disabilitati, decorazioni: mai testo informativo */
+  --testo-muto: #9aa79f;
+  --smeraldo: #16845a;
+  --menta-chiaro: #a7e8c9;
+  --superficie-verde: #e8f7ef;
+  --bordo-tenue: #edf2ee;
+  --bordo-forte: #c9d5cd;
+  --errore-bordo: #f0c4bf;
+
+  --focus: 0 0 0 3px rgb(22 132 90 / 0.22);
+  --ombra-card: 0 1px 2px rgb(7 59 40 / 0.04), 0 1px 1px rgb(7 59 40 / 0.03);
+  --ombra-card-hover: 0 4px 14px rgb(7 59 40 / 0.07), 0 1px 3px rgb(7 59 40 / 0.05);
+  --ombra-overlay: 0 12px 32px rgb(7 59 40 / 0.14), 0 2px 6px rgb(7 59 40 / 0.08);
+  --gradiente-progresso: linear-gradient(90deg, #16845a, #38b982);
+  --t-veloce: 140ms cubic-bezier(0.2, 0, 0, 1);
+  --t-media: 220ms cubic-bezier(0.2, 0, 0, 1);
 
   /* Gruppi di stato: fondo e testo */
-  --attesa-f: #ffe3b6;
-  --attesa-t: #8a3b12;
-  --colloqui-f: #c2daff;
-  --colloqui-t: #1f4e9e;
-  --proposta-f: #dcc2ff;
+  --attesa-f: #fef3e2;
+  --attesa-t: #8a4b0f;
+  --colloqui-f: #e6eefc;
+  --colloqui-t: #1e4fa3;
+  --proposta-f: #f0e9fd;
   --proposta-t: #5b2e9e;
-  --assunzione-f: #cbf949;
-  --assunzione-t: #092d0b;
-  --rifiutata-f: #fbe4e1;
-  --rifiutata-t: #b3261e;
-  --senza-risposta-f: #ebebdd;
-  --senza-risposta-t: #565e50;
+  --assunzione-f: #e8f7ef;
+  --assunzione-t: #0b5138;
+  --rifiutata-f: #fdecea;
+  --rifiutata-t: #b42318;
+  --senza-risposta-f: #eef2ef;
+  --senza-risposta-t: #5f6e66;
 
   /* Sui fondi scuri */
-  --su-scuro: #e7eedd;
-  --su-scuro-2: #cfdcc1;
-  --linea-spenta: #5f7a56;
+  --su-scuro: #ffffff;
+  --su-scuro-2: #b8c9c0;
+  --linea-spenta: #2e6b52;
 
   --r-pillola: 999px;
-  --r-campo: 12px;
-  --r-pannello: 20px;
-  --r-banda: 24px;
-
-  --ombra-overlay: 0 8px 28px rgb(9 45 11 / 0.16), 0 1px 3px rgb(9 45 11 / 0.1);
+  --r-campo: 10px;
+  --r-pannello: 14px;
+  --r-banda: 18px;
 
   --larghezza-barra: 236px;
-  --font: 'Mona Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }

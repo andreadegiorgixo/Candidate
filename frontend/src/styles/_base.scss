@@ -14,9 +14,11 @@ html {
 
 body {
   font-family: var(--font);
-  font-size: 15px;
-  line-height: 1.45;
-  color: var(--bosco);
+  font-size: 14.5px;
+  line-height: 1.5;
+  letter-spacing: -0.006em;
+  font-feature-settings: 'cv11', 'ss01';
+  color: var(--testo);
   background: var(--avorio);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -39,7 +41,7 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--verde-testo);
+  outline: 2px solid var(--smeraldo);
   outline-offset: 2px;
 }
 
@@ -50,17 +52,28 @@ h3 {
 }
 
 h1 {
-  font-size: 38px;
-  line-height: 1.08;
-  font-weight: 800;
-  font-stretch: 112%;
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: 600;
   letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+h3 {
+  font-size: 15px;
+  font-weight: 600;
 }
 
 h2.t,
 .titolo-sezione {
-  font-size: 19px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
   margin-bottom: 10px;
 }
 
@@ -89,17 +102,22 @@ ol {
 
 @media (max-width: 1050px) {
   h1 {
-    font-size: 30px;
+    font-size: 24px;
   }
+}
+
+::selection {
+  background: var(--menta-chiaro);
+  color: var(--bosco);
 }
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.001ms !important;
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }

@@ -124,7 +124,7 @@ const intero = (v: number | null) => (v === null || Number.isNaN(Number(v)) ? nu
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      border: 1px solid #8b917f;
+      border: 1px solid var(--bordo-forte);
       background: var(--bianco);
       font-weight: 650;
     }
@@ -132,9 +132,9 @@ const intero = (v: number | null) => (v === null || Number.isNaN(Number(v)) ? nu
       background: var(--sabbia);
     }
     .n.on {
-      background: var(--bosco);
-      border-color: var(--bosco);
-      color: var(--lime);
+      background: var(--superficie-verde);
+      border-color: var(--menta-chiaro);
+      color: var(--bosco-2);
     }
     mat-dialog-actions {
       padding: 8px 24px 20px;

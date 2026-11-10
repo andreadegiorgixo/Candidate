@@ -28,7 +28,7 @@
   }
 
   &.pericolo {
-    border-color: #e5b8b4;
+    border-color: var(--errore-bordo);
     grid-column: 1 / -1;
 
     h2.t {

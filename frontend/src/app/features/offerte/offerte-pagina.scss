@@ -33,7 +33,7 @@
       display: block;
       font-size: 18px;
       font-weight: 750;
-      color: var(--bosco);
+      color: var(--testo);
       text-decoration: none;
       padding-right: 70px;
 
@@ -85,11 +85,11 @@
 }
 
 .migliore {
-  background: var(--lime);
-  color: var(--bosco);
-  font-weight: 700;
-  border-radius: 8px;
-  padding: 1px 9px;
+  background: var(--superficie-verde);
+  color: var(--bosco-2);
+  font-weight: 600;
+  border-radius: var(--r-pillola);
+  padding: 2px 9px;
   display: inline-block;
 }
 

@@ -20,7 +20,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       gap: 6px;
       padding: 28px 26px;
       background: var(--bianco);
-      border: 1px dashed #8b917f;
+      border: 1px dashed var(--bordo-forte);
       border-radius: var(--r-pannello);
     }
     h3 {

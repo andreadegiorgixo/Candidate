@@ -86,7 +86,7 @@ import { Icona } from '../../shared/icona/icona';
       gap: 8px;
       text-align: center;
       padding: 18px 16px;
-      border: 2px dashed #8b917f;
+      border: 2px dashed var(--bordo-forte);
       border-radius: var(--r-campo);
       background: var(--avorio);
       transition: background-color 0.12s;

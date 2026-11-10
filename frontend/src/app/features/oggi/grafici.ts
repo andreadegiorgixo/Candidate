@@ -1,7 +1,7 @@
 import type { EChartsCoreOption } from 'echarts/core';
 import { DataISO, formatoBreve, formatoCompleto, nomeGiorno } from '../../core/date';
 import { TabellaModello } from '../../shared/tabella-dati/tabella-dati';
-import { CATEGORIE, FONT, GRIGLIA, TESTO, TESTO_2 } from '../../shared/grafico/palette';
+import { CATEGORIE, FONT, GRIGLIA, SCALA_FERMATE, SFONDO, TESTO, TESTO_2 } from '../../shared/grafico/palette';
 import { Giorno, Settimana } from './ritmo.logic';
 
 /** Un grafico completo: opzioni, tabella alternativa e descrizione per chi non lo vede. */
@@ -15,12 +15,12 @@ const BASE = {
   animation: false,
   textStyle: { fontFamily: FONT, color: TESTO, fontSize: 13 },
   tooltip: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#DEDFCF',
+    backgroundColor: SFONDO,
+    borderColor: '#E2EAE4',
     borderWidth: 1,
     padding: [8, 12],
     textStyle: { fontFamily: FONT, color: TESTO, fontSize: 13 },
-    extraCssText: 'box-shadow: 0 8px 28px rgb(9 45 11 / 0.16); border-radius: 12px;',
+    extraCssText: 'box-shadow: 0 12px 32px rgb(7 59 40 / 0.14); border-radius: 10px;',
   },
 };
 
@@ -29,7 +29,7 @@ const LINEA_GRIGLIA = { lineStyle: { color: GRIGLIA } };
 
 /** Barre sottili con estremità arrotondate di 4px e 2px di spazio tra i riempimenti. */
 function stileBarra(colore: string, raggio: number[] = [4, 4, 4, 4]) {
-  return { color: colore, borderRadius: raggio, borderColor: '#FFFFFF', borderWidth: 1 };
+  return { color: colore, borderRadius: raggio, borderColor: SFONDO, borderWidth: 1 };
 }
 
 // ----------------------------------------------------------------- ritmo
@@ -49,7 +49,7 @@ export function graficoRitmo(settimane: Settimana[], obiettivo: number): Modello
       tooltip: {
         ...BASE.tooltip,
         trigger: 'axis',
-        axisPointer: { type: 'shadow', shadowStyle: { color: 'rgb(9 45 11 / 0.05)' } },
+        axisPointer: { type: 'shadow', shadowStyle: { color: 'rgb(7 59 40 / 0.05)' } },
         formatter: (p: unknown) => {
           const dati = (p as { dataIndex: number }[])[0];
           const s = settimane[dati.dataIndex];
@@ -59,7 +59,7 @@ export function graficoRitmo(settimane: Settimana[], obiettivo: number): Modello
       xAxis: {
         type: 'category',
         data: etichette,
-        axisLine: { lineStyle: { color: '#8b917f' } },
+        axisLine: { lineStyle: { color: '#9AA79F' } },
         axisTick: { show: false },
         axisLabel: { ...ASSE_TESTO, hideOverlap: true },
       },
@@ -116,11 +116,11 @@ export function graficoCalendario(giorni: Giorno[], da: DataISO, a: DataISO): Mo
         itemGap: 14,
         textStyle: { color: TESTO_2, fontFamily: FONT, fontSize: 12 },
         pieces: [
-          { value: 0, label: 'Nessun invio', color: '#EBEBDD' },
-          { value: 1, label: '1', color: '#8CBF45' },
-          { value: 2, label: '2', color: '#5E9A2E' },
-          { value: 3, label: '3', color: '#3F7D20' },
-          { min: 4, label: '4 o più', color: '#173814' },
+          { value: 0, label: 'Nessun invio', color: '#EEF5F0' },
+          { value: 1, label: '1', color: SCALA_FERMATE[0] },
+          { value: 2, label: '2', color: SCALA_FERMATE[1] },
+          { value: 3, label: '3', color: SCALA_FERMATE[2] },
+          { min: 4, label: '4 o più', color: SCALA_FERMATE[3] },
         ],
       },
       calendar: {
@@ -131,7 +131,7 @@ export function graficoCalendario(giorni: Giorno[], da: DataISO, a: DataISO): Mo
         bottom: 44,
         cellSize: ['auto', 15],
         orient: 'horizontal',
-        itemStyle: { borderWidth: 2.5, borderColor: '#FFFFFF', borderRadius: 4 },
+        itemStyle: { borderWidth: 2.5, borderColor: SFONDO, borderRadius: 4 },
         splitLine: { show: false },
         yearLabel: { show: false },
         monthLabel: { nameMap: MESI, color: TESTO_2, fontFamily: FONT, fontSize: 12 },

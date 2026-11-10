@@ -4,7 +4,7 @@
 
 .linea {
   background: var(--bosco);
-  color: #fff;
+  color: var(--bianco);
   border-radius: var(--r-banda);
   padding: 26px 34px 22px;
 }
@@ -54,7 +54,6 @@ h2 {
     font-size: 44px;
     line-height: 50px;
     font-weight: 750;
-    font-stretch: 112%;
   }
 
   .pt {
@@ -69,13 +68,13 @@ h2 {
   }
 
   span {
-    color: #dde8d0;
+    color: var(--su-scuro-2);
     font-size: 14px;
   }
 
   .vuota {
     b {
-      color: #8fa585;
+      color: rgb(255 255 255 / 0.55);
     }
 
     .pt {
@@ -87,12 +86,12 @@ h2 {
 .fuori {
   margin-top: 18px;
   padding-top: 12px;
-  border-top: 1px solid #2a4a28;
+  border-top: 1px solid rgb(255 255 255 / 0.08);
   color: var(--su-scuro-2);
   font-size: 14px;
 
   a {
-    color: #fff;
+    color: var(--bianco);
     text-decoration-color: rgb(255 255 255 / 0.4);
     text-underline-offset: 3px;
 

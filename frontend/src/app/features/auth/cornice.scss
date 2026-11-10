@@ -6,7 +6,7 @@
 
 .marchio {
   background: var(--bosco);
-  color: #fff;
+  color: var(--bianco);
   padding: 36px 48px;
   display: flex;
   flex-direction: column;
@@ -17,23 +17,20 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 800;
-  font-stretch: 112%;
+  font-weight: 650;
   font-size: 22px;
 
   i {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 5px solid var(--lime);
+    width: 28px;
+    height: 28px;
+    background: url('/logo.svg') center / contain no-repeat;
   }
 }
 
 .frase {
   font-size: 44px;
   line-height: 1.04;
-  font-weight: 800;
-  font-stretch: 112%;
+  font-weight: 650;
   letter-spacing: -0.02em;
   max-width: 11ch;
 }
@@ -82,8 +79,8 @@
   place-items: center;
   padding: 40px 24px;
   background:
-    radial-gradient(60% 50% at 85% 8%, rgb(203 249 73 / 0.42), transparent 70%),
-    radial-gradient(50% 40% at 10% 100%, rgb(203 249 73 / 0.22), transparent 70%),
+    radial-gradient(60% 50% at 85% 8%, rgb(56 185 130 / 0.3), transparent 70%),
+    radial-gradient(50% 40% at 10% 100%, rgb(56 185 130 / 0.16), transparent 70%),
     var(--avorio);
 }
 

@@ -23,7 +23,7 @@
 
     &.off {
       background: var(--bianco);
-      border: 2px solid #aeb5a3;
+      border: 2px solid var(--testo-muto);
     }
 
     &.corrente {
@@ -40,7 +40,7 @@
     background: var(--bosco);
 
     &.off {
-      background: #d2d5c4;
+      background: var(--bordo-forte);
     }
 
     /* Rifiuto: la linea si interrompe con un taglio. */
@@ -65,7 +65,7 @@
     /* Senza risposta: la linea sfuma nel grigio. */
     &.sfuma {
       width: 56px;
-      background: linear-gradient(90deg, var(--bosco), rgb(9 45 11 / 0));
+      background: linear-gradient(90deg, var(--bosco), rgb(7 59 40 / 0));
     }
   }
 }
@@ -104,7 +104,7 @@
 
   strong {
     font-size: 14.5px;
-    color: var(--bosco);
+    color: var(--testo);
     font-weight: 650;
   }
 
@@ -113,7 +113,7 @@
     height: 17px;
     border-radius: 50%;
     background: var(--bianco);
-    border: 3px solid #8b917f;
+    border: 3px solid var(--bordo-forte);
     margin-bottom: 8px;
     position: relative;
   }

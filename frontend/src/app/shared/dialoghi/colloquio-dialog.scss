@@ -38,7 +38,7 @@ legend {
   }
 
   .testo {
-    border: 1px solid #8b917f;
+    border: 1px solid var(--bordo-forte);
     border-radius: var(--r-campo);
     padding: 8px 12px;
     min-height: 40px;
@@ -67,7 +67,7 @@ legend {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 1px solid #8b917f;
+    border: 1px solid var(--bordo-forte);
     background: var(--bianco);
     font-weight: 650;
 
@@ -76,9 +76,9 @@ legend {
     }
 
     &.on {
-      background: var(--bosco);
-      border-color: var(--bosco);
-      color: var(--lime);
+      background: var(--superficie-verde);
+      border-color: var(--menta-chiaro);
+      color: var(--bosco-2);
     }
   }
 

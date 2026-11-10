@@ -39,7 +39,7 @@ import { messaggioErrore } from '../../core/errori';
     i.b {
       width: 28%;
       height: 10px;
-      background: #f2f2e6;
+      background: var(--sabbia);
     }
   `,
 })
@@ -66,7 +66,7 @@ export class Scheletro {
       gap: 6px;
       padding: 24px 26px;
       background: var(--bianco);
-      border: 1px solid #e5b8b4;
+      border: 1px solid var(--errore-bordo);
       border-radius: var(--r-pannello);
     }
     h3 {

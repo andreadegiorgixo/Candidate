@@ -30,7 +30,7 @@
   input {
     width: 100%;
     height: 40px;
-    border: 1px solid #8b917f;
+    border: 1px solid var(--bordo-forte);
     border-radius: var(--r-campo);
     padding: 0 12px 0 38px;
     background: var(--bianco);
@@ -73,12 +73,12 @@
     color: var(--testo-2);
 
     &[aria-pressed='true'] {
-      background: var(--bosco);
-      color: var(--lime);
+      background: var(--superficie-verde);
+      color: var(--bosco-2);
     }
 
     &:not([aria-pressed='true']):hover {
-      color: var(--bosco);
+      color: var(--testo);
     }
   }
 }
@@ -155,13 +155,13 @@ thead th {
 
     &:hover {
       background: var(--sabbia);
-      color: var(--bosco);
+      color: var(--testo);
     }
   }
 
   &[aria-sort='ascending'],
   &[aria-sort='descending'] {
-    color: var(--bosco);
+    color: var(--testo);
   }
 
   app-icona {
@@ -178,7 +178,7 @@ tbody tr {
   }
 
   &:hover {
-    background: #fbfbf4;
+    background: var(--avorio);
   }
 }
 
@@ -189,7 +189,7 @@ tbody tr {
   .azienda {
     display: block;
     font-weight: 650;
-    color: var(--bosco);
+    color: var(--testo);
     text-decoration: none;
 
     &:hover {
@@ -262,7 +262,7 @@ tbody tr {
     margin: 12px 0 4px;
 
     select {
-      border: 1px solid #8b917f;
+      border: 1px solid var(--bordo-forte);
       border-radius: var(--r-campo);
       background: var(--bianco);
       padding: 7px 10px;

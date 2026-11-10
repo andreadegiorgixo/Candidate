@@ -45,14 +45,16 @@ const ESEMPI: Esempio[] = [
 ];
 
 const SWATCH: { nome: string; valore: string; uso: string; chiaro?: boolean }[] = [
-  { nome: '--bosco', valore: '#092D0B', uso: 'Testo, barra laterale, pulsante primario' },
-  { nome: '--bosco-2', valore: '#173814', uso: 'Hover sul fondo scuro' },
-  { nome: '--lime', valore: '#CBF949', uso: 'Voce attiva, testo del pulsante primario, linea su scuro', chiaro: true },
-  { nome: '--avorio', valore: '#F9F9EF', uso: 'Sfondo pagina', chiaro: true },
-  { nome: '--sabbia', valore: '#EBEBDD', uso: 'Divisori, fondi tenui', chiaro: true },
-  { nome: '--bordo', valore: '#DEDFCF', uso: 'Bordi', chiaro: true },
-  { nome: '--testo-2', valore: '#565E50', uso: 'Testo secondario' },
-  { nome: '--verde-testo', valore: '#3F6F20', uso: 'Link e focus su fondo chiaro' },
+  { nome: '--bosco', valore: '#073B28', uso: 'Barra laterale, fondi scuri' },
+  { nome: '--bosco-2', valore: '#0B5138', uso: 'Pulsante primario, hover scuri' },
+  { nome: '--lime', valore: '#38B982', uso: 'Indicatore voce attiva, focus su scuro, badge su scuro', chiaro: true },
+  { nome: '--avorio', valore: '#F7FAF8', uso: 'Sfondo pagina', chiaro: true },
+  { nome: '--sabbia', valore: '#EEF5F0', uso: 'Divisori, fondi tenui', chiaro: true },
+  { nome: '--bordo', valore: '#E2EAE4', uso: 'Bordi', chiaro: true },
+  { nome: '--testo-2', valore: '#5F6E66', uso: 'Testo secondario' },
+  { nome: '--testo', valore: '#142B20', uso: 'Testo principale' },
+  { nome: '--smeraldo', valore: '#16845A', uso: 'Focus, indicatori', chiaro: false },
+  { nome: '--verde-testo', valore: '#13764F', uso: 'Link e focus su fondo chiaro' },
 ];
 
 /** Pagina di sviluppo: tutti i componenti condivisi, nei loro stati. Non esiste in produzione. */

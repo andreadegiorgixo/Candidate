@@ -64,7 +64,7 @@ h2.t {
 
   .azienda {
     font-weight: 650;
-    color: var(--bosco);
+    color: var(--testo);
     text-decoration: none;
     overflow-wrap: anywhere;
 
@@ -91,7 +91,7 @@ h2.t {
   }
 
   .azione {
-    color: var(--bosco);
+    color: var(--testo);
     border-top: 1px solid var(--sabbia);
     padding-top: 5px;
     margin-top: 3px;
@@ -130,7 +130,7 @@ h2.t {
 }
 
 .lista.cdk-drop-list-dragging {
-  outline: 2px dashed #8b917f;
+  outline: 2px dashed var(--bordo-forte);
   outline-offset: 2px;
   border-radius: 12px;
 }
